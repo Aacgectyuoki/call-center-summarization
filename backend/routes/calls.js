@@ -1,9 +1,8 @@
-const express = require("express");
-const { uploadCall } = require("../controllers/callController");
-const authMiddleware = require("../middleware/authMiddleware");
-
+const express = require('express');
 const router = express.Router();
+const { getCalls, createCall } = require('../controllers/callController');
 
-router.post("/upload", authMiddleware, uploadCall);
+router.get('/', getCalls);
+router.post('/', createCall);
 
 module.exports = router;

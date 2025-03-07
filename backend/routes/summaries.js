@@ -1,9 +1,8 @@
-const express = require("express");
-const { generateSummary } = require("../controllers/summaryController");
-const authMiddleware = require("../middleware/authMiddleware");
-
+const express = require('express');
 const router = express.Router();
+const { getSummaries, createSummary } = require('../controllers/summaryController');
 
-router.post("/generate", authMiddleware, generateSummary);
+router.get('/', getSummaries);
+router.post('/', createSummary);
 
 module.exports = router;

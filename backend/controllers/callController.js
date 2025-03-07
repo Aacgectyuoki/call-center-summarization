@@ -1,14 +1,25 @@
-const Call = require("../models/Call");
-const File = require("../models/File");
+const Call = require('../models/Call');
+const Transcription = require('../models/Transcription');
+const Summary = require('../models/Summary');
 
-exports.uploadCall = async (req, res) => {
+// Get all calls
+exports.getCalls = async (req, res) => {
     try {
-        const { filename, fileType, filePath, uploadedBy } = req.body;
-        const file = new File({ filename, fileType, filePath, uploadedBy, isCall: true });
-
-        await file.save();
-        res.status(201).json({ message: "Call uploaded successfully", file });
+        const calls = await Call.find().populate('transcription summary');
+        res.json(calls);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Create a new call record
+exports.createCall = async (req, res) => {
+    try {
+        const { agentId, audioFile } = req.body;
+        const newCall = new Call({ agentId, audioFile });
+        await newCall.save();
+        res.status(201).json(newCall);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
     }
 };

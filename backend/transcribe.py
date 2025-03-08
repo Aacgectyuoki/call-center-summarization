@@ -56,14 +56,14 @@ class Transcriber:
             return f"Error: File '{file_path}' not found."
 
         try:
-            result = self.transcriber(file_path)
+            result = self.transcriber(file_path, return_timestamps=True, generate_kwargs={"task": "transcribe", "language": "en"})
             return result["text"]
         except Exception as e:
             return f"Error during transcription: {e}"
 
 # Usage
 if __name__ == "__main__":
-    audio_file = "Andrew Schmidt - NC Director.mp3"
+    audio_file = "youtube_audio.mp3"
     transcriber = Transcriber(model_size="openai/whisper-small")  # Change model size if needed
     transcription = transcriber.transcribe_audio(audio_file)
     print("Transcription:\n", transcription)

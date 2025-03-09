@@ -54,15 +54,25 @@ class Transcriber:
         except Exception as e:
             return f"Error during transcription: {e}"
 
-    def summarize_text(self, text, max_length=200):
+    def summarize_text(self, text, max_length=1000):
         """
         Summarizes the given text.
         """
         try:
-            summary = self.summarizer(text, max_length=max_length, min_length=50, do_sample=False)
+            prompt = (
+                "You are an assistant that summarizes transcriptions. Please extract and summarize all key details from the following transcription while preserving the intent and tone. Ensure no critical points are lost and keep the summary structured into clear bullet points, each starting with '•' and a new line before it."
+            )
+            summary = self.summarizer(f"{prompt}\n\n{text}", max_length=max_length, min_length=50, do_sample=False)
             return summary[0]['summary_text']
         except Exception as e:
             return f"Error during summarization: {e}"
+
+    def save_to_file(self, content, file_path):
+        """
+        Saves the given content to a text file.
+        """
+        with open(file_path, "w") as f:
+            f.write(content)
 
     def transcribe_and_summarize(self, file_path):
         """
@@ -71,7 +81,8 @@ class Transcriber:
         transcription = self.transcribe_audio(file_path)
         if "Error" in transcription:
             return transcription
-        return self.summarize_text(transcription)
+        summary = self.summarize_text(transcription)
+        return transcription, summary
 
     def process_video(self, file_path):
         """
@@ -84,14 +95,20 @@ class Transcriber:
             return mp3_file
 
         print(f"Transcribing and summarizing {file_path}...")
-        return self.transcribe_and_summarize(mp3_file)
+        transcription, summary = self.transcribe_and_summarize(mp3_file)
+        self.save_to_file(transcription, "transcription.txt")
+        self.save_to_file(summary, "summary.txt")
+        return transcription, summary
 
     def process_audio(self, file_path):
         """
         Transcribes and summarizes an MP3 file.
         """
         print(f"Transcribing and summarizing {file_path}...")
-        return self.transcribe_and_summarize(file_path)
+        transcription, summary = self.transcribe_and_summarize(file_path)
+        self.save_to_file(transcription, "transcription.txt")
+        self.save_to_file(summary, "summary.txt")
+        return transcription, summary
 
     def process_youtube(self, url):
         """
@@ -104,7 +121,10 @@ class Transcriber:
             return mp3_file
 
         print("Transcribing and summarizing YouTube audio...")
-        return self.transcribe_and_summarize(mp3_file)
+        transcription, summary = self.transcribe_and_summarize(mp3_file)
+        self.save_to_file(transcription, "transcription.txt")
+        self.save_to_file(summary, "summary.txt")
+        return transcription, summary
 
 
 # **Run Tests**

@@ -42,3 +42,8 @@ __pycache__/
 # Ignore data files
 data/transcription.txt
 data/summary.txt
+
+# Ignore media files
+*.mp3
+*.wav
+*.mp4

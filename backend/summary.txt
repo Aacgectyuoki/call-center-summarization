@@ -1,0 +1,4 @@
+MongoDB is a document database as opposed to our traditional column and row store databases. 
+It uses a BSON format, which is basically a super set of JSON. 
+So like any database, you have your basic CRUD operations, your create, read, update, and delete. 
+It's going to be kind of similar to what you're familiar with if you've done a traditional database.

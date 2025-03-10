@@ -30,3 +30,15 @@ build/
 # Ignore test coverage
 coverage/
 .env
+
+# Ignore virtual environment
+.venv/
+
+# Ignore Python cache files
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore data files
+data/transcription.txt
+data/summary.txt

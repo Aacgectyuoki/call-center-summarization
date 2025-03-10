@@ -46,4 +46,4 @@ data/summary.txt
 # Ignore media files
 *.mp3
 *.wav
-*.mp4
+*.mp4.venv/

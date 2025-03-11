@@ -1,4 +1,14 @@
 backend/.venv/lib/python3.9/site-packages/torch/lib/* filter=lfs diff=lfs merge=lfs -text
 backend/.venv/lib/python3.9/site-packages/imageio_ffmpeg/binaries/ffmpeg-macos-x86_64-v7.1 filter=lfs diff=lfs merge=lfs -text
 backend/.venv/lib/python3.9/site-packages/numpy/.dylibs/libopenblas64_.0.dylib filter=lfs diff=lfs merge=lfs -text
+backend/venv/lib/python3.9/site-packages/torch/lib/libtorch_python.dylib filter=lfs diff=lfs merge=lfs -text
+backend/venv/lib/python3.9/site-packages/tokenizers/tokenizers.abi3.so filter=lfs diff=lfs merge=lfs -text
+backend/venv/lib/python3.9/site-packages/numpy/.dylibs/libgfortran.5.dylib filter=lfs diff=lfs merge=lfs -text
+backend/venv/lib/python3.9/site-packages/numpy/core/_multiarray_umath.cpython-39-darwin.so filter=lfs diff=lfs merge=lfs -text
+backend/youtube_audio.mp3 filter=lfs diff=lfs merge=lfs -text
+backend/venv/lib/python3.9/site-packages/torch/bin/protoc filter=lfs diff=lfs merge=lfs -text
+backend/venv/lib/python3.9/site-packages/torch/bin/protoc-3.13.0.0 filter=lfs diff=lfs merge=lfs -text
+backend/mongoDB.mp3 filter=lfs diff=lfs merge=lfs -text
+backend/venv/lib/python3.9/site-packages/tiktoken/_tiktoken.cpython-39-darwin.so filter=lfs diff=lfs merge=lfs -text
+backend/venv/lib/python3.9/site-packages/numpy/core/_simd.cpython-39-darwin.so filter=lfs diff=lfs merge=lfs -text
 backend/.venv/lib/python3.9/site-packages/torch/lib/libtorch_cpu.dylib filter=lfs diff=lfs merge=lfs -text

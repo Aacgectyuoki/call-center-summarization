@@ -30,3 +30,6 @@ build/
 # Ignore test coverage
 coverage/
 .env
+
+.venv/
+venv/

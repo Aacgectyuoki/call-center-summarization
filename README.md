@@ -15,6 +15,7 @@ A robust AI-powered call center transcription and summarization system. This pro
 
 ---
 
+
 ## Tech Stack
 
 | **Component**      | **Technology Used**                                             |
@@ -32,7 +33,8 @@ A robust AI-powered call center transcription and summarization system. This pro
 
 ---
 
-Workflow
+
+## Workflow
 
 1️⃣ User Uploads Audio → Node.js API Stores File (uploads/ directory) → Saves Metadata in MongoDB\
 2️⃣ Node.js Calls Python (transcribe.py) → Python Transcribes Audio → Stores in MongoDB (Status: "Completed")\

@@ -1,8 +1,11 @@
-const express = require('express');
-const router = express.Router();
-const { getCalls, createCall } = require('../controllers/callController');
+const express = require("express");
+const { getCalls, createCall } = require("../controllers/callController");
+const { authenticateUser } = require("../middleware/authMiddleware");
 
-router.get('/', getCalls);
-router.post('/', createCall);
+const router = express.Router();
+
+router.get("/", authenticateUser, getCalls);
+router.post("/", authenticateUser, createCall);
 
 module.exports = router;
+

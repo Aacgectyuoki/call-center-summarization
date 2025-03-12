@@ -1,25 +1,33 @@
-const Call = require('../models/Call');
-const Transcription = require('../models/Transcription');
-const Summary = require('../models/Summary');
+const Call = require("../models/Call");
+const { authenticateUser } = require("../middleware/authMiddleware");
 
-// Get all calls
+// Fetch all calls (Authenticated Users Only)
 exports.getCalls = async (req, res) => {
     try {
-        const calls = await Call.find().populate('transcription summary');
-        res.json(calls);
+        const calls = await Call.find({ user: req.user.id }); // Fetch user's calls only
+        res.status(200).json(calls);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error("Error fetching calls:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 };
 
-// Create a new call record
+// Create a new call (Authenticated Users Only)
 exports.createCall = async (req, res) => {
     try {
         const { agentId, audioFile } = req.body;
-        const newCall = new Call({ agentId, audioFile });
+
+        const newCall = new Call({
+            agentId,
+            user: req.user.id, // Attach user to call
+            audioFile,
+        });
+
         await newCall.save();
-        res.status(201).json(newCall);
+        res.status(201).json({ message: "Call created successfully", call: newCall });
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        console.error("Error creating call:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 };
+

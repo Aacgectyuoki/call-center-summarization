@@ -1,8 +1,11 @@
-const express = require('express');
-const router = express.Router();
-const { getSummaries, createSummary } = require('../controllers/summaryController');
+const express = require("express");
+const { getSummaries, createSummary } = require("../controllers/summaryController");
+const { authenticateUser, authorizeRole } = require("../middleware/authMiddleware");
 
-router.get('/', getSummaries);
-router.post('/', createSummary);
+const router = express.Router();
+
+router.get("/", authenticateUser, getSummaries); // Users can fetch their own summaries
+router.get("/admin", authenticateUser, authorizeRole(["Admin"]), getSummaries); // Admins fetch all summaries
+router.post("/", authenticateUser, createSummary); // Users can create summaries
 
 module.exports = router;

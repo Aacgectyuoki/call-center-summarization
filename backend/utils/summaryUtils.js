@@ -1,40 +1,40 @@
-// exports.generateSummary = async (text) => {
-//     // Simulate AI summarization
-//     return {
-//         summary: "This is a summary of: " + text,
-//         sentiment: "Neutral",
-//         keywords: ["sample", "summary"]
-//     };
-// };
-
 const OpenAI = require("openai");
-require("dotenv").config();
+const Sentiment = require("sentiment");
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const sentiment = new Sentiment();
 
 /**
- * Summarizes the given text using OpenAI's GPT API.
- * @param {string} text - The transcription text.
- * @returns {Promise<string>} - The summarized text.
+ * Summarizes a given transcription and performs sentiment analysis.
+ * @param {string} transcription - The text transcription of a call.
+ * @returns {Promise<Object>} - Returns an object containing the summary and sentiment analysis.
  */
-async function summarizeText(text) {
+async function summarizeText(transcription) {
     try {
+        // Generate summary using OpenAI GPT
         const response = await openai.chat.completions.create({
             model: "gpt-4",
             messages: [
-                { role: "system", content: "You are a helpful AI assistant that summarizes call transcriptions concisely." },
-                { role: "user", content: `Summarize the following call transcript:\n\n${text}` }
+                { role: "system", content: "You are an expert at summarizing call center transcriptions accurately while preserving key details." },
+                { role: "user", content: `Summarize this call transcription:\n${transcription}` }
             ],
-            temperature: 0.7,
-            max_tokens: 150
+            temperature: 0.5,
+            max_tokens: 200
         });
 
-        return response.choices[0].message.content.trim();
+        // Extract summary from API response
+        const summary = response.choices[0].message.content.trim();
+
+        // Perform sentiment analysis
+        const sentimentResult = sentiment.analyze(summary);
+        let sentimentScore = "Neutral";
+        if (sentimentResult.score > 1) sentimentScore = "Positive";
+        if (sentimentResult.score < -1) sentimentScore = "Negative";
+
+        return { summary, sentiment: sentimentScore };
     } catch (error) {
         console.error("Error in summarization:", error);
-        throw new Error("Summarization failed");
+        throw new Error("Failed to generate summary.");
     }
 }
 

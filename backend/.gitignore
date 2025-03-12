@@ -31,6 +31,7 @@ build/
 coverage/
 .env
 
+<<<<<<< HEAD
 # Ignore virtual environment
 .venv/
 
@@ -47,3 +48,7 @@ data/summary.txt
 *.mp3
 *.wav
 *.mp4.venv/
+=======
+.venv/
+venv/
+>>>>>>> main

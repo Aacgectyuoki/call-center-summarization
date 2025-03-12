@@ -73,8 +73,31 @@ const getSummaryById = async (req, res) => {
     }
 };
 
+/**
+ * Creates a new summary.
+ */
+const createSummary = async (req, res) => {
+    try {
+        const { transcriptionId, summaryText, bulletPoints, sentiment } = req.body;
+
+        const summary = new Summary({
+            transcription: transcriptionId,
+            summaryText,
+            bulletPoints,
+            sentiment,
+            createdAt: new Date(),
+        });
+
+        await summary.save();
+        res.status(201).json({ message: "Summary created successfully", summary });
+    } catch (error) {
+        res.status(500).json({ message: "Error creating summary", error });
+    }
+};
+
 module.exports = {
     summarizeTranscription,
     getSummaries,
-    getSummaryById
+    getSummaryById,
+    createSummary
 };

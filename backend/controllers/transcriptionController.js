@@ -77,11 +77,32 @@ const getTranscriptionById = async (req, res) => {
     }
 };
 
+/**
+ * Creates a new transcription.
+ */
+const createTranscription = async (req, res) => {
+    try {
+        const { audioFile, transcriptionText } = req.body;
+
+        const transcription = new Transcription({
+            audioFile,
+            transcription: transcriptionText,
+            createdAt: new Date(),
+        });
+
+        await transcription.save();
+        res.status(201).json({ message: "Transcription created successfully", transcription });
+    } catch (error) {
+        res.status(500).json({ message: "Error creating transcription", error });
+    }
+};
+
 module.exports = {
     upload,
     uploadAudio,
     getTranscriptions,
-    getTranscriptionById
+    getTranscriptionById,
+    createTranscription
 };
 
 

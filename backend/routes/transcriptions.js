@@ -1,5 +1,6 @@
 const express = require("express");
 const { getTranscriptions, createTranscription } = require("../controllers/transcriptionController");
+
 const { authenticateUser } = require("../middleware/authMiddleware");
 
 const router = express.Router();

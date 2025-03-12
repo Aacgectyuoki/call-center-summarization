@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const { transcribeAudio } = require("../utils/transcribeUtils");
 const Transcription = require("../models/Transcription");
+const { downloadYouTubeAudio } = require("../utils/youtubeUtils");
 
 // Download YouTube Audio and Transcribe
 exports.transcribeYouTube = async (req, res) => {
@@ -16,27 +17,25 @@ exports.transcribeYouTube = async (req, res) => {
         const videoId = ytdl.getURLVideoID(videoUrl);
         const audioFilePath = path.join(__dirname, `../uploads/${videoId}.mp3`);
 
-        const audioStream = ytdl(videoUrl, { quality: "highestaudio" });
-        const writeStream = fs.createWriteStream(audioFilePath);
-        audioStream.pipe(writeStream);
+        // Download YouTube Audio
+        await downloadYouTubeAudio(videoUrl, audioFilePath);
 
-        writeStream.on("finish", async () => {
-            // Transcribe the audio
-            const transcriptionText = await transcribeAudio(audioFilePath);
-            
-            // Save transcription in MongoDB
-            const transcription = new Transcription({
-                audioFile: videoId + ".mp3",
-                transcription: transcriptionText,
-                createdAt: new Date()
-            });
+        // Transcribe the audio
+        const transcriptionText = await transcribeAudio(audioFilePath);
 
-            await transcription.save();
-
-            res.status(200).json({ message: "Transcription completed", transcription });
+        // Save transcription in MongoDB
+        const transcription = new Transcription({
+            audioFile: videoId + ".mp3",
+            transcription: transcriptionText,
+            createdAt: new Date(),
         });
 
+        await transcription.save();
+
+        res.status(200).json({ message: "Transcription completed", transcription });
+
     } catch (error) {
+        console.error("YouTube Transcription Error:", error);
         res.status(500).json({ message: "Error processing YouTube transcription", error });
     }
 };

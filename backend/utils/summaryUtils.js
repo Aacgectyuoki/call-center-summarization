@@ -1,7 +1,11 @@
-const OpenAI = require("openai");
 const Sentiment = require("sentiment");
+require("dotenv").config();
+const { OpenAI } = require("openai");
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
+
 const sentiment = new Sentiment();
 
 /**
@@ -22,8 +26,19 @@ async function summarizeText(transcription) {
             max_tokens: 200
         });
 
+        // ✅ Ensure response and choices exist before accessing them
+        if (!response || !response.choices || response.choices.length === 0) {
+            throw new Error("Invalid API response. No choices returned.");
+        }
+
+        // ✅ Ensure message is not null or undefined
+        const message = response.choices[0].message?.content;
+        if (!message) {
+            throw new Error("OpenAI response message is empty or null.");
+        }
+
         // Extract summary from API response
-        const summary = response.choices[0].message.content.trim();
+        const summary = message.trim();
 
         // Perform sentiment analysis
         const sentimentResult = sentiment.analyze(summary);

@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const axios = require("axios");
 require("dotenv").config();
+const FormData = require("form-data");
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_WHISPER_URL = "https://api.openai.com/v1/audio/transcriptions";

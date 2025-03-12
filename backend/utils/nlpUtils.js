@@ -1,5 +1,8 @@
 const natural = require("natural");
-const sentiment = require("sentiment");
+const Sentiment = require("sentiment");
+
+// Create an instance of Sentiment
+const sentiment = new Sentiment();
 
 // Tokenizer for text processing
 const tokenizer = new natural.WordTokenizer();
@@ -22,7 +25,7 @@ const tokenizeText = (text) => {
  * Analyzes sentiment (positive, neutral, negative).
  */
 const analyzeSentiment = (text) => {
-    const analysis = sentiment(text);
+    const analysis = sentiment.analyze(text); // <-- FIX: Use sentiment instance
     if (analysis.score > 0) return "positive";
     if (analysis.score < 0) return "negative";
     return "neutral";

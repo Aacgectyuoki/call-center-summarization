@@ -16,9 +16,11 @@
 const mongoose = require("mongoose");
 
 const TranscriptionSchema = new mongoose.Schema({
-  audioFile: { type: String, required: true },
-  transcription: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now },
+    audioFile: { type: String, required: true }, // Path to the uploaded audio file
+    transcription: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now },
+    processingTime: { type: Number, default: 0 } // Add this field
 });
 
 module.exports = mongoose.model("Transcription", TranscriptionSchema);
+

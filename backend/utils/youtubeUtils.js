@@ -1,23 +1,33 @@
 const ytdl = require("ytdl-core");
+const { Writable } = require("stream");
+const { pipeline } = require("stream");
+const util = require("util");
 const fs = require("fs");
-const path = require("path");
+
+
+const pipelinePromise = util.promisify(pipeline);
 
 /**
  * Downloads audio from a YouTube video.
+ * @param {string} videoUrl - The URL of the YouTube video.
+ * @param {string} outputPath - The path where the audio file will be saved.
+ * @returns {Promise<string>} - A promise that resolves with the output path when the download is complete.
  */
 const downloadYouTubeAudio = async (videoUrl, outputPath) => {
     try {
-        const stream = ytdl(videoUrl, { filter: "audioonly", quality: "highestaudio" });
-        const writeStream = fs.createWriteStream(outputPath);
-
-        stream.pipe(writeStream);
-        
-        return new Promise((resolve, reject) => {
-            writeStream.on("finish", () => resolve(outputPath));
-            writeStream.on("error", (error) => reject(error));
+        const audioStream = ytdl(videoUrl, { filter: 'audioonly' });
+        const writeStream = new Writable({
+            write(chunk, encoding, callback) {
+                fs.appendFile(outputPath, chunk, callback);
+            }
         });
+
+        await pipelinePromise(audioStream, writeStream);
+
+        console.log(`✅ Download complete: ${outputPath}`);
+        return outputPath;
     } catch (error) {
-        console.error("YouTube audio download failed:", error);
+        console.error("❌ YouTube audio download failed:", error);
         throw error;
     }
 };

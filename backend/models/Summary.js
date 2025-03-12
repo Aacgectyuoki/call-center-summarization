@@ -9,6 +9,7 @@ const SummarySchema = new mongoose.Schema(
     sentiment: { type: String, enum: ["positive", "neutral", "negative"], default: "neutral" },
     complexity: { type: String, enum: ["concise", "regular", "simplified"], default: "regular" },
     createdAt: { type: Date, default: Date.now },
+    processingTime: { type: Number, default: 0 }
   },
   { timestamps: true }
 );

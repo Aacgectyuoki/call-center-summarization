@@ -33,7 +33,7 @@ A robust AI-powered call center transcription and summarization system. This pro
 ## 🏠 Project Structure
 
 ```
-📦 call-center-ai
+📦 dtsummarizr
  ┣ 📂 backend
  ┃ ┣ 📂 config
  ┃ ┃ ┗ 📜 db.js              		# MongoDB connection
@@ -188,7 +188,7 @@ Want to contribute? Open an issue or submit a pull request!
 
 ## 🐝 License
 
-MIT License © 2025 Call Center AI Team
+MIT License © 2025 Max Dell-Thibodeau & Friends & Family
 
 ---
 

@@ -1,10 +1,10 @@
-# 📞 DTSummarizr - Transcription & Summarization System
+# DTSummarizr - Transcription & Summarization System
 
 A robust AI-powered call center transcription and summarization system. This project transcribes audio calls, processes the text, and provides summaries using AI-powered natural language processing.
 
 ---
 
-## 📌 Features
+## Features
 
 ✅ **Audio Transcription:** Convert call recordings into text using OpenAI Whisper.\
 ✅ **Summarization:** Generate concise summaries using OpenAI GPT models.\
@@ -15,7 +15,7 @@ A robust AI-powered call center transcription and summarization system. This pro
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | **Component**      | **Technology Used**                                             |
 | ------------------ | --------------------------------------------------------------- |
@@ -27,13 +27,24 @@ A robust AI-powered call center transcription and summarization system. This pro
 | **Summarization**  | OpenAI GPT                                                      |
 | **NLP Processing** | spaCy, NLTK                                                     |
 | **Authentication** | JWT, bcrypt                                                     |
+| **API Testing**    | Postman
+                                                     |
 
 ---
 
-## 🏠 Project Structure
+Workflow
+
+1️⃣ User Uploads Audio → Node.js API Stores File (uploads/ directory) → Saves Metadata in MongoDB
+2️⃣ Node.js Calls Python (transcribe.py) → Python Transcribes Audio → Stores in MongoDB (Status: "Completed")
+3️⃣ Node.js Fetches Transcription → Calls Python (summarize.py) → Python Summarizes → Saves to MongoDB
+4️⃣ Node.js Fetches Summary → Sends Summary to User via API
+
+---
+
+## Project Structure
 
 ```
-📦 dtsummarizr
+📦 call-center-summarization
  ┣ 📂 backend
  ┃ ┣ 📂 config
  ┃ ┃ ┗ 📜 db.js              		# MongoDB connection
@@ -91,13 +102,13 @@ A robust AI-powered call center transcription and summarization system. This pro
 
 ---
 
-## 🛠️ Setup & Installation
+## Setup & Installation
 
 ### 1️⃣ Clone the Repository
 
 ```sh
-git clone https://github.com/your-username/call-center-ai.git
-cd call-center-ai
+git clone https://github.com/Aacgectyuoki/call-center-summarization.git
+cd call-center-summarization
 ```
 
 ### 2️⃣ Install Backend Dependencies

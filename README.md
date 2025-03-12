@@ -20,7 +20,8 @@ A robust AI-powered call center transcription and summarization system. This pro
 | **Component**      | **Technology Used**                                             |
 | ------------------ | --------------------------------------------------------------- |
 | **Backend**        | Node.js, Express.js                                             |
-| **Frontend** (TBD) | React, Next.js                                                  |
+| **Frontend**       | React
+                                                  |
 | **Database**       | MongoDB (Mongoose)                                              |
 | **File Storage**   | Multer, AWS S3                                                  |
 | **Speech-to-Text** | OpenAI Whisper, Google Speech-to-Text, AWS Transcribe, Deepgram |
@@ -34,9 +35,9 @@ A robust AI-powered call center transcription and summarization system. This pro
 
 Workflow
 
-1️⃣ User Uploads Audio → Node.js API Stores File (uploads/ directory) → Saves Metadata in MongoDB
-2️⃣ Node.js Calls Python (transcribe.py) → Python Transcribes Audio → Stores in MongoDB (Status: "Completed")
-3️⃣ Node.js Fetches Transcription → Calls Python (summarize.py) → Python Summarizes → Saves to MongoDB
+1️⃣ User Uploads Audio → Node.js API Stores File (uploads/ directory) → Saves Metadata in MongoDB\
+2️⃣ Node.js Calls Python (transcribe.py) → Python Transcribes Audio → Stores in MongoDB (Status: "Completed")\
+3️⃣ Node.js Fetches Transcription → Calls Python (summarize.py) → Python Summarizes → Saves to MongoDB\
 4️⃣ Node.js Fetches Summary → Sends Summary to User via API
 
 ---

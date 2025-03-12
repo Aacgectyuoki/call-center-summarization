@@ -20,8 +20,7 @@ A robust AI-powered call center transcription and summarization system. This pro
 | **Component**      | **Technology Used**                                             |
 | ------------------ | --------------------------------------------------------------- |
 | **Backend**        | Node.js, Express.js                                             |
-| **Frontend**       | React
-                                                     |
+| **Frontend**       | React                                                            |
 | **Database**       | MongoDB (Mongoose)                                              |
 | **File Storage**   | Multer, AWS S3                                                  |
 | **Speech-to-Text** | OpenAI Whisper, Google Speech-to-Text, AWS Transcribe, Deepgram |

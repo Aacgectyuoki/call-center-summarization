@@ -1,4 +1,4 @@
-# 📞 Call Center AI - Transcription & Summarization System
+# 📞 DTSummarizr - Transcription & Summarization System
 
 A robust AI-powered call center transcription and summarization system. This project transcribes audio calls, processes the text, and provides summaries using AI-powered natural language processing.
 
@@ -6,7 +6,7 @@ A robust AI-powered call center transcription and summarization system. This pro
 
 ## 📌 Features
 
-✅ **Audio Transcription:** Convert call recordings into text using OpenAI Whisper, Google Speech-to-Text, or AssemblyAI.\
+✅ **Audio Transcription:** Convert call recordings into text using OpenAI Whisper.\
 ✅ **Summarization:** Generate concise summaries using OpenAI GPT models.\
 ✅ **Sentiment Analysis:** Detect the tone and sentiment of transcribed calls.\
 ✅ **Multi-Language Support:** Process audio in multiple languages.\
@@ -33,35 +33,60 @@ A robust AI-powered call center transcription and summarization system. This pro
 ## 🏠 Project Structure
 
 ```
-📺 call-center-ai
- ├ 📺 backend
- ├ ├ 📂 config
- ├ ├ ├ 📄 db.js               # MongoDB connection
- ├ ├ 📂 controllers
- ├ ├ ├ 📄 authController.js   # Handles authentication
- ├ ├ ├ 📄 callController.js   # Manages call records
- ├ ├ ├ 📄 summaryController.js # Summarization logic
- ├ ├ ├ 📄 transcriptionController.js # Transcription logic
- ├ ├ ├ 📄 analyticsController.js # Sentiment analysis
- ├ ├ 📂 middleware
- ├ ├ ├ 📄 authMiddleware.js   # JWT authentication
- ├ ├ ├ 📄 errorHandler.js     # Handles errors globally
- ├ ├ 📂 models
- ├ ├ ├ 📄 Call.js             # Call schema
- ├ ├ ├ 📄 File.js             # File metadata
- ├ ├ ├ 📄 Summary.js          # Summary schema
- ├ ├ ├ 📄 Transcription.js    # Transcription schema
- ├ ├ ├ 📄 User.js             # User schema
- ├ ├ 📂 routes
- ├ ├ ├ 📄 calls.js            # Call routes
- ├ ├ ├ 📄 summaries.js        # Summary routes
- ├ ├ ├ 📄 transcriptions.js    # Transcription routes
- ├ ├ 📂 uploads
- ├ ├ 📄 server.js             # Express API server
- ├ ├ 📄 .env                  # Environment variables
- ├ ├ 📄 package.json          # Backend dependencies
- ├ 📂 frontend (TBD)
- └ 📄 README.md
+📦 call-center-ai
+ ┣ 📂 backend
+ ┃ ┣ 📂 config
+ ┃ ┃ ┗ 📜 db.js              		# MongoDB connection
+ ┃ ┣ 📂 controllers
+ ┃ ┃ ┣ 📜 authController.js  		# Handles authentication (JWT)
+ ┃ ┃ ┣ 📜 callController.js  		# Manages call records
+ ┃ ┃ ┣ 📜 summaryController.js 		# Handles summarization logic
+ ┃ ┃ ┣ 📜 transcriptionController.js 	# Handles transcriptions (JS version)
+ ┃ ┃ ┣ 📜 youtubeController.js 		# Handles YouTube transcription (JS)
+ ┃ ┃ ┣ 📜 videoController.js 		# Handles video-to-audio conversion (JS)
+ ┃ ┃ ┗ 📜 analyticsController.js 		# Sentiment & processing time tracking
+ ┃ ┣ 📂 middleware
+ ┃ ┃ ┣ 📜 authMiddleware.js   	# JWT authentication
+ ┃ ┃ ┣ 📜 errorHandler.js     	# Handles errors globally
+ ┃ ┃ ┗ 📜 timerMiddleware.js  	# Logs processing time for API requests
+ ┃ ┣ 📂 models
+ ┃ ┃ ┣ 📜 Call.js             		# Call schema (audio file metadata)
+ ┃ ┃ ┣ 📜 File.js             		# File metadata schema
+ ┃ ┃ ┣ 📜 Settings.js         	# User settings schema
+ ┃ ┃ ┣ 📜 Summary.js          	# Summarization schema
+ ┃ ┃ ┣ 📜 Transcription.js    	# Transcription schema
+ ┃ ┃ ┣ 📜 User.js             	# User schema
+ ┃ ┃ ┗ 📜 Video.js            	# Stores video metadata (file path, extracted audio)
+ ┃ ┣ 📂 routes
+ ┃ ┃ ┣ 📜 calls.js            		# Routes for handling calls
+ ┃ ┃ ┣ 📜 summaries.js        	# Routes for managing summaries
+ ┃ ┃ ┣ 📜 transcriptions.js   	# Routes for transcriptions (JS)
+ ┃ ┃ ┣ 📜 youtube.js          	# Routes for YouTube video transcription (JS)
+ ┃ ┃ ┗ 📜 video.js            	# Routes for video-to-audio conversion (JS)
+ ┃ ┣ 📂 utils
+ ┃ ┃ ┣ 📜 fileHandler.js      	# Handles file uploads (Multer)
+ ┃ ┃ ┣ 📜 summaryUtils.js     	# Summarization helper functions
+ ┃ ┃ ┣ 📜 transcribeUtils.js  	# Transcription functions (Whisper JS)
+ ┃ ┃ ┣ 📜 nlpUtils.js         	# NLP-based text processing
+ ┃ ┃ ┣ 📜 youtubeUtils.js     	# Downloads & extracts audio from YouTube videos (JS)
+ ┃ ┃ ┗ 📜 videoUtils.js       	# Converts video files to audio (JS)
+ ┃ ┣ 📂 uploads
+ ┃ ┃ ┣ 📂 transcripts/        	# Stores generated transcription text files
+ ┃ ┃ ┣ 📂 audio/              	# Stores extracted audio from YouTube & video files
+ ┃ ┃ ┣ 📂 videos/             	# Stores uploaded video files before conversion
+ ┃ ┃ ┣ 📜 sample_audio.mp3   	# Example audio file
+ ┃ ┃ ┗ 📜 sample_video.mp4   	# Example video file
+ ┃ ┣ 📂 python_scripts
+ ┃ ┃ ┗ 📜 full_transcription.py 	# Python-based transcription & summarization (YouTube, MP4, MP3)
+ ┃ ┃ 
+ ┃ ┣ 📜 server.js             		# Main Express server file (JS API)
+ ┃ ┣ 📜 requirements.txt      	# Python dependencies for `full_transcription.py`
+ ┃ ┣ 📜 run_transcription.py    	# Python script wrapper to execute `full_transcription.py`
+ ┃ ┣ 📜 .gitignore            		# Ignore node_modules, .env, uploads
+ ┃ ┣ 📜 .env                  		# Environment variables
+ ┃ ┗ 📜 package.json          	# Backend dependencies
+ ┣ 📂 frontend (TBD)
+ ┗ 📜 README.md                # Documentation
 ```
 
 ---

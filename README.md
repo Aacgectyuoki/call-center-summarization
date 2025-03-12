@@ -161,7 +161,7 @@ npm start
 
 ---
 
-## 🛠️ API Endpoints
+## API Endpoints
 
 | Method | Endpoint                  | Description                  |
 | ------ | ------------------------- | ---------------------------- |
@@ -176,7 +176,7 @@ npm start
 
 ---
 
-## 🤖 Testing with Postman
+## Testing with Postman
 
 1️⃣ Start the backend server.\
 2️⃣ Open **Postman** and send a `POST` request to `/api/calls` with an audio file.\
@@ -185,21 +185,21 @@ npm start
 
 ---
 
-## 💬 Contributing
+## Contributing
 
 Want to contribute? Open an issue or submit a pull request!
 
 ---
 
-## 🏆 Future Improvements
+## Future Improvements
 
-🚀 **Real-Time Transcription** (WebSockets for live call processing).\
-🌍 **Multi-Language Support** (Translate transcriptions automatically).\
-📊 **Advanced Analytics** (Track call sentiment trends).
+**Real-Time Transcription** (WebSockets for live call processing).\
+**Multi-Language Support** (Translate transcriptions automatically).\
+**Advanced Analytics** (Track call sentiment trends).
 
 ---
 
-## 🐝 License
+## License
 
 MIT License © 2025 Max Dell-Thibodeau & Friends & Family
 

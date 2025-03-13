@@ -1,8 +1,11 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
+const bodyParser = require("body-parser");
 const { connectDB } = require("./config/db");
 const timerMiddleware = require("./middleware/timerMiddleware");
+const awsRoutes = require("./routes/awsRoutes");
+const awsS3Routes = require("./routes/awsS3");
 
 // Load environment variables
 dotenv.config();
@@ -16,20 +19,23 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(express.json());
 app.use(cors());
+app.use(bodyParser.json()); // Needed for JSON body parsing
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(timerMiddleware);
 
 // Import Routes
 const callRoutes = require("./routes/calls");
 const summaryRoutes = require("./routes/summaries");
 const transcriptionRoutes = require("./routes/transcriptions");
-const videoRoutes = require("./routes/video"); // ✅ ADD THIS LINE
+const videoRoutes = require("./routes/video");
 
 // Use Routes
 app.use("/api/calls", callRoutes);
 app.use("/api/summaries", summaryRoutes);
 app.use("/api/transcriptions", transcriptionRoutes);
-app.use("/api/videos", videoRoutes); // ✅ ADD THIS LINE
-// app.use("")
+app.use("/api/videos", videoRoutes);
+app.use("/aws", awsRoutes);
+app.use("/aws/s3", awsS3Routes); // ✅ Fix: Add this back for file uploads!
 app.use("/uploads", express.static("uploads"));
 
 // Error Handling Middleware (Optional)
@@ -41,7 +47,7 @@ app.use((err, req, res, next) => {
 // Start Server
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
 
-// test if server is running
+// Test if server is running
 app.get("/", (req, res) => {
   res.status(200).json({ message: "Server is running" });
 });

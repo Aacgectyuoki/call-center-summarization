@@ -1,6 +1,6 @@
 const { invokeLambda } = require("../utils/awsLambdaUtils");
 
-exports.processAudioLambda = async (req, res) => {
+const processAudioLambda = async (req, res) => {
     try {
         const { audioFile } = req.body;
 
@@ -18,5 +18,5 @@ exports.processAudioLambda = async (req, res) => {
 };
 
 module.exports = {
-    invokeLambda
+    invokeLambda, processAudioLambda
   };

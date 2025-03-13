@@ -1,15 +1,15 @@
 const express = require("express");
 const { transcribeAudio } = require("../controllers/transcriptionController");
-const { summarizeText } = require("../controllers/summaryController");
 const { processAudioLambda } = require("../controllers/awsLambdaController");
+const { generateSummary } = require("../controllers/summaryController");
 
 const router = express.Router();
 
-// Transcription API (AWS Transcribe)
+// AWS Transcribe - Start Transcription
 router.post("/transcribe", transcribeAudio);
 
-// Summarization API (AWS SageMaker)
-router.post("/summarize", summarizeText);
+// Summarization API (GPT-4)
+router.post("/summarize", generateSummary);
 
 // AWS Lambda for Audio Processing
 router.post("/lambda/process-audio", processAudioLambda);

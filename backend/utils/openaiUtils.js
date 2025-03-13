@@ -1,19 +1,32 @@
 const axios = require('axios');
 
-const openAiApiKey = process.env.OPENAI_API_KEY;
-
 const summarizeText = async (text) => {
-    const response = await axios.post(
-        "https://api.openai.com/v1/chat/completions", 
-        {
-            model: "gpt-4",
-            messages: [{ role: "system", content: "Summarize this text." }, { role: "user", content: text }],
-            max_tokens: 150,
-        }, 
-        { headers: { Authorization: `Bearer ${openAiApiKey}`, "Content-Type": "application/json" } 
-    });
+    const OPENAI_API_KEY = process.env.OPENAI_API_KEY; // Store in .env file
 
-    return response.data.choices[0].message.content;
+    try {
+        const response = await axios.post(
+            "https://api.openai.com/v1/chat/completions",
+            {
+                model: "gpt-4", // Ensure you're using GPT-4
+                messages: [
+                    { role: "system", content: "Summarize the given text." },
+                    { role: "user", content: text },
+                ],
+                max_tokens: 150,
+            },
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${OPENAI_API_KEY}`,
+                },
+            }
+        );
+
+        return response.data.choices[0].message.content.trim();
+    } catch (error) {
+        console.error("OpenAI API error:", error);
+        throw new Error("Failed to summarize text");
+    }
 };
 
 module.exports = { summarizeText };

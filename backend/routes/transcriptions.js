@@ -1,12 +1,13 @@
 const express = require("express");
-const { getTranscriptions, createTranscription } = require("../controllers/transcriptionController");
+// const { getTranscriptions, createTranscription } = require("../controllers/transcriptionController");
+const { getTranscription } = require("../controllers/transcriptionController");
 
 const { authenticateUser } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-router.get("/", authenticateUser, getTranscriptions);
-router.post("/", authenticateUser, createTranscription);
+router.get("/:id", authenticateUser, getTranscription);
+// router.post("/", authenticateUser, createTranscription);
 
 module.exports = router;
 

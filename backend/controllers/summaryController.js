@@ -2,14 +2,17 @@ const { summarizeText } = require('../utils/openaiUtils');
 
 const generateSummary = async (req, res) => {
     try {
-        const { transcription } = req.body;
-        if (!transcription) {
+        const { transcription, transcriptionText } = req.body;
+        const text = transcription || transcriptionText; // Accept both field names
+
+        if (!text) {
             return res.status(400).json({ error: 'No transcription provided' });
         }
 
-        const summary = await summarizeText(transcription);
+        const summary = await summarizeText(text);
         res.json({ summary });
     } catch (error) {
+        console.error("Summarization Error:", error);
         res.status(500).json({ error: 'Failed to generate summary' });
     }
 };

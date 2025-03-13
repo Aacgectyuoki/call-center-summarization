@@ -1,8 +1,21 @@
-const AWS = require("aws-sdk");
+const { LambdaClient, InvokeCommand } = require("@aws-sdk/client-lambda");
+require("dotenv").config();
 
-AWS.config.update({ region: "us-east-1" });
+const region = process.env.AWS_REGION;
+const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
+const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
 
-const lambda = new AWS.Lambda();
+if (!region || !accessKeyId || !secretAccessKey) {
+    throw new Error("AWS configuration environment variables are not set");
+}
+
+const lambdaClient = new LambdaClient({
+    region: region,
+    credentials: {
+        accessKeyId: accessKeyId,
+        secretAccessKey: secretAccessKey
+    }
+});
 
 const invokeLambda = async (functionName, payload) => {
     const params = {
@@ -11,38 +24,20 @@ const invokeLambda = async (functionName, payload) => {
     };
 
     try {
-        const response = await lambda.invoke(params).promise();
-        return JSON.parse(response.Payload);
+        const command = new InvokeCommand(params);
+        const response = await lambdaClient.send(command);
+        return JSON.parse(Buffer.from(response.Payload).toString());
     } catch (error) {
-        throw new Error("Error invoking Lambda function: " + error.message);
+        console.error("Error invoking Lambda:", error);
+        throw new Error("Lambda invocation failed");
     }
 };
 
-const triggerLambdaTranscription = async (payload) => {
-    const functionName = "yourLambdaFunctionName"; // Replace with your actual Lambda function name
+// Define and export the triggerLambdaTranscription function
+const triggerLambdaTranscription = async (audioPath) => {
+    const functionName = "your-lambda-function-name"; // Replace with your actual Lambda function name
+    const payload = { audioPath }; // Adjust the payload as needed
     return await invokeLambda(functionName, payload);
 };
 
-module.exports = {
-    invokeLambda,
-    triggerLambdaTranscription
-};
-
-
-// const AWS = require("aws-sdk");
-// const lambda = new AWS.Lambda();
-
-// const invokeLambdaFunction = async (functionName, payload) => {
-//   try {
-//     const params = {
-//       FunctionName: functionName,
-//       Payload: JSON.stringify(payload),
-//     };
-//     const response = await lambda.invoke(params).promise();
-//     return JSON.parse(response.Payload);
-//   } catch (error) {
-//     throw new Error(`Lambda invocation failed: ${error.message}`);
-//   }
-// };
-
-// module.exports = { invokeLambdaFunction };
+module.exports = { invokeLambda, triggerLambdaTranscription };

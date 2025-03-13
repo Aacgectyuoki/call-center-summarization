@@ -42,4 +42,28 @@ async function transcribeAudio(filePath) {
     }
 }
 
-module.exports = { transcribeAudio };
+/**
+ * Processes the transcription results.
+ * @param {Object} transcriptionData - The transcription data to process.
+ * @returns {Promise<void>}
+ */
+async function processTranscription(transcriptionData) {
+    try {
+        const { jobName, status, results } = transcriptionData;
+
+        if (status !== 'COMPLETED') {
+            throw new Error("Transcription job not completed");
+        }
+
+        const transcriptionText = results.transcripts[0].transcript;
+
+        // Save or process the transcription text as needed
+        // For example, save to a database or file
+        console.log(`Transcription for job ${jobName}: ${transcriptionText}`);
+    } catch (error) {
+        console.error("Error processing transcription:", error);
+        throw error;
+    }
+}
+
+module.exports = { transcribeAudio, processTranscription };

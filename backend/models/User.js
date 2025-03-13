@@ -1,30 +1,23 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
 const UserSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    role: { type: String, enum: ["User", "Admin"], default: "User" }, // Role field
 }, { timestamps: true });
 
-module.exports = mongoose.model("User", UserSchema);
+// Hash password before saving
+UserSchema.pre('save', async function (next) {
+    if (!this.isModified('password')) return next();
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+});
 
+// Compare entered password with hashed password
+UserSchema.methods.comparePassword = async function (password) {
+    return bcrypt.compare(password, this.password);
+};
 
-// const mongoose = require("mongoose");
-
-// const UserSchema = new mongoose.Schema(
-//   {
-//     name: { type: String, required: true },
-//     email: { type: String, required: true, unique: true },
-//     password: { type: String, required: true },
-//     role: { type: String, enum: ["user", "admin"], default: "user" },
-//     preferences: {
-//       language: { type: String, default: "en" },
-//       summaryStyle: { type: String, enum: ["concise", "detailed", "bullet"], default: "detailed" },
-//     },
-//     createdAt: { type: Date, default: Date.now },
-//   },
-//   { timestamps: true }
-// );
-
-// module.exports = mongoose.model("User", UserSchema);
+module.exports = mongoose.model('User', UserSchema);

@@ -1,4 +1,6 @@
 const AWS = require("aws-sdk");
+const fs = require("fs");
+const path = require("path");
 
 AWS.config.update({ region: "us-east-1" });
 
@@ -19,4 +21,10 @@ exports.startTranscription = async (s3Uri, jobName) => {
     } catch (error) {
         throw new Error("Error starting transcription: " + error.message);
     }
+};
+
+exports.saveTranscription = (transcriptText) => {
+    const filePath = path.join(__dirname, "transcriptions", `${Date.now()}.txt`);
+    fs.writeFileSync(filePath, transcriptText, "utf8");
+    console.log(`Transcription saved to ${filePath}`);
 };

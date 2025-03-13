@@ -4,7 +4,7 @@ AWS.config.update({ region: "us-east-1" });
 
 const lambda = new AWS.Lambda();
 
-exports.invokeLambda = async (functionName, payload) => {
+const invokeLambda = async (functionName, payload) => {
     const params = {
         FunctionName: functionName,
         Payload: JSON.stringify(payload)
@@ -16,6 +16,16 @@ exports.invokeLambda = async (functionName, payload) => {
     } catch (error) {
         throw new Error("Error invoking Lambda function: " + error.message);
     }
+};
+
+const triggerLambdaTranscription = async (payload) => {
+    const functionName = "yourLambdaFunctionName"; // Replace with your actual Lambda function name
+    return await invokeLambda(functionName, payload);
+};
+
+module.exports = {
+    invokeLambda,
+    triggerLambdaTranscription
 };
 
 

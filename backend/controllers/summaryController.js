@@ -1,21 +1,21 @@
-const { generateSummary } = require("../utils/awsSageMakerUtils");
+const { summarizeText } = require('../utils/openaiUtils');
 
-exports.summarizeText = async (req, res) => {
+const generateSummary = async (req, res) => {
     try {
-        const { transcriptionId, text } = req.body;
-
-        if (!text) {
-            return res.status(400).json({ message: "Text is required for summarization" });
+        const { transcription } = req.body;
+        if (!transcription) {
+            return res.status(400).json({ error: 'No transcription provided' });
         }
 
-        // Call SageMaker
-        const summary = await generateSummary(text);
-
-        res.status(200).json({ transcriptionId, summary });
+        const summary = await summarizeText(transcription);
+        res.json({ summary });
     } catch (error) {
-        res.status(500).json({ message: "Error generating summary", error });
+        res.status(500).json({ error: 'Failed to generate summary' });
     }
 };
+
+module.exports = { generateSummary, summarizeText };
+
 
 
 // const Summary = require("../models/Summary");

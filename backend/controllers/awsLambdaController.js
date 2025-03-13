@@ -16,3 +16,7 @@ exports.processAudioLambda = async (req, res) => {
         res.status(500).json({ message: "Error processing audio with Lambda", error });
     }
 };
+
+module.exports = {
+    invokeLambda
+  };

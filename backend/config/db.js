@@ -1,17 +1,42 @@
-const mongoose = require("mongoose");
+const { MongoClient, ServerApiVersion } = require('mongodb');
+const dotenv = require('dotenv');
+
+dotenv.config();
+
+const uri = process.env.MONGO_URI;
+if (!uri) {
+    throw new Error("MONGO_URI is not defined in the .env file");
+}
+
+const client = new MongoClient(uri, {
+  serverApi: {
+      version: ServerApiVersion.v1,
+      strict: true,
+      deprecationErrors: true,
+  },
+  tls: true, 
+  tlsAllowInvalidCertificates: true, 
+  serverSelectionTimeoutMS: 30000, 
+});
+
+let db;
 
 const connectDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log("✅ MongoDB Connected...");
-  } catch (err) {
-    console.error("❌ MongoDB Connection Error:", err);
-    process.exit(1); // Stop server on connection failure
-  }
+    try {
+        await client.connect();
+        db = client.db(); // Store the database instance
+        console.log("✅ MongoDB Connected...");
+    } catch (err) {
+        console.error("❌ MongoDB Connection Error:", err);
+        process.exit(1);
+    }
 };
 
-// Listen for MongoDB connection events
-mongoose.connection.on("disconnected", () => console.log("❗ MongoDB Disconnected!"));
-mongoose.connection.on("reconnected", () => console.log("🔄 MongoDB Reconnected!"));
+const getDB = () => {
+    if (!db) {
+        throw new Error("Database not initialized. Call connectDB first.");
+    }
+    return db;
+};
 
-module.exports = connectDB;
+module.exports = { connectDB, getDB }; // ✅ Ensure correct exports

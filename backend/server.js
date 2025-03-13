@@ -1,7 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
-const connectDB = require("./config/db");
+const { connectDB } = require("./config/db");
 const timerMiddleware = require("./middleware/timerMiddleware");
 
 // Load environment variables
@@ -29,6 +29,7 @@ app.use("/api/calls", callRoutes);
 app.use("/api/summaries", summaryRoutes);
 app.use("/api/transcriptions", transcriptionRoutes);
 app.use("/api/videos", videoRoutes); // ✅ ADD THIS LINE
+// app.use("")
 app.use("/uploads", express.static("uploads"));
 
 // Error Handling Middleware (Optional)

@@ -2,7 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
-const Video = require("../models/Video");
+const { getDB } = require("../config/db"); // Ensure MongoClient connection
 const { extractAudioFromVideo } = require("../utils/videoUtils");
 
 const router = express.Router();
@@ -27,7 +27,18 @@ const storage = multer.diskStorage({
     }
 });
 
-const upload = multer({ storage });
+const upload = multer({
+    storage,
+    fileFilter: (req, file, cb) => {
+        // ✅ Allow only video file types
+        const allowedMimeTypes = ["video/mp4", "video/mkv", "video/avi", "video/webm"];
+        if (allowedMimeTypes.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(null, false);
+        }
+    }
+});
 
 // ✅ Route to Upload Video
 router.post("/upload", upload.single("video"), async (req, res) => {
@@ -36,20 +47,24 @@ router.post("/upload", upload.single("video"), async (req, res) => {
             return res.status(400).json({ success: false, message: "No video file uploaded" });
         }
 
+        const db = getDB();
+        const videoCollection = db.collection("videos");
+
         // ✅ Save video metadata in MongoDB
-        const video = new Video({
+        const videoData = {
             filename: req.file.filename,
             filePath: req.file.path,
             fileSize: req.file.size,
-            processed: false
-        });
+            processed: false,
+            uploadedAt: new Date()
+        };
 
-        await video.save();
+        const result = await videoCollection.insertOne(videoData);
 
         res.status(201).json({
             success: true,
             message: "Video uploaded successfully",
-            video
+            video: result.insertedId
         });
     } catch (error) {
         console.error("Upload error:", error);
@@ -57,40 +72,14 @@ router.post("/upload", upload.single("video"), async (req, res) => {
     }
 });
 
-// ✅ Route to Extract Audio from Video
-router.post("/extract-audio/:videoId", async (req, res) => {
-    try {
-        const video = await Video.findById(req.params.videoId);
-        if (!video) {
-            return res.status(404).json({ success: false, message: "Video not found" });
-        }
-
-        const audioFilename = `${Date.now()}-${video.filename}.mp3`;
-        const audioPath = path.join(UPLOAD_AUDIO_DIR, audioFilename);
-
-        // ✅ Extract and Save Audio
-        await extractAudioFromVideo(video.filePath, audioPath);
-
-        // ✅ Store the audio file path in MongoDB
-        video.processed = true;
-        video.extractedAudio = audioPath; // ✅ Storing path instead of ObjectId
-        await video.save();
-
-        res.status(200).json({
-            success: true,
-            message: "Audio extracted successfully",
-            audioPath
-        });
-    } catch (error) {
-        console.error("Extraction error:", error);
-        res.status(500).json({ success: false, message: "Error extracting audio from video", error: error.message });
-    }
-});
-
 // ✅ Route to Fetch All Videos
 router.get("/", async (req, res) => {
     try {
-        const videos = await Video.find();
+        const db = getDB();
+        const videoCollection = db.collection("videos");
+
+        const videos = await videoCollection.find().toArray();
+
         res.status(200).json({ success: true, message: "Videos retrieved successfully", videos });
     } catch (error) {
         console.error("Fetch error:", error);

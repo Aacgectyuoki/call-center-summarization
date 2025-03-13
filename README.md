@@ -33,13 +33,13 @@ A robust AI-powered call center transcription and summarization system that tran
 
 ## Project Structure
 
-📦 call-center-ai
- ┣ 📂 backend
- ┃ ┣ 📂 config
- ┃ ┃ ┣ 📜 db.js                # MongoDB connection
- ┃ ┃ ┣ 📜 awsConfig.js         # AWS SDK configuration
- ┃ ┃ ┗ 📜 envConfig.js         # Environment variable handler
- ┃ ┣ 📂 controllers
+📦 call-center-ai/
+ ┣ 📂 backend/
+ ┃ ┣ 📂 config/
+ ┃ ┃ ┣ 📜 db.js                # MongoDB connection/
+ ┃ ┃ ┣ 📜 awsConfig.js         # AWS SDK configuration/
+ ┃ ┃ ┗ 📜 envConfig.js         # Environment variable handler/
+ ┃ ┣ 📂 controllers/
  ┃ ┃ ┣ 📜 authController.js    # Handles authentication (JWT)
  ┃ ┃ ┣ 📜 callController.js    # Manages call records
  ┃ ┃ ┣ 📜 summaryController.js # Handles summarization logic (AWS SageMaker)

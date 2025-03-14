@@ -26,14 +26,13 @@ const getTranscription = async (req, res) => {
 
         // Fetch transcription from database (MongoDB)
         const transcription = await Transcription.findById(transcriptionId);
-
         if (!transcription) {
             return res.status(404).json({ error: "Transcription not found" });
         }
 
         res.json(transcription);
     } catch (error) {
-        res.status(500).json({ error: "Error fetching transcription" });
+        res.status(500).json({ error: "Failed to fetch transcription" });
     }
 };
 

@@ -1,41 +1,26 @@
-const { startTranscription } = require("../utils/awsTranscribeUtils");
+const AWS = require("aws-sdk");
 
-exports.transcribeAudio = async (req, res) => {
+AWS.config.update({ region: "us-east-1" });
+const transcribe = new AWS.TranscribeService();
+
+const startTranscriptionJob = async (s3Url) => {
+    const jobName = `transcription-${Date.now()}`;
+    const params = {
+        TranscriptionJobName: jobName,
+        LanguageCode: "en-US",
+        MediaFormat: "mp3",
+        Media: { MediaFileUri: s3Url },
+        OutputBucketName: process.env.S3_BUCKET_NAME,
+    };
+
     try {
-        const { s3Uri, jobName } = req.body;
-
-        if (!s3Uri || !jobName) {
-            return res.status(400).json({ message: "S3 URI and Job Name are required" });
-        }
-
-        const response = await startTranscription(s3Uri, jobName);
-
-        res.status(200).json(response);
+        await transcribe.startTranscriptionJob(params).promise();
+        console.log("Started transcription job:", jobName);
+        return jobName;
     } catch (error) {
-        res.status(500).json({ message: "Error transcribing audio", error });
+        console.error("Transcription error:", error);
+        throw new Error("Failed to start transcription job");
     }
 };
 
-
-// const AWS = require("aws-sdk");
-// const Transcription = require("../models/Transcription");
-
-// const transcribe = new AWS.TranscribeService();
-
-// exports.startTranscription = async (req, res) => {
-//   try {
-//     const { audioFile } = req.body;
-
-//     const params = {
-//       TranscriptionJobName: `Transcription-${Date.now()}`,
-//       LanguageCode: "en-US",
-//       Media: { MediaFileUri: audioFile },
-//       OutputBucketName: process.env.S3_BUCKET_NAME,
-//     };
-
-//     await transcribe.startTranscriptionJob(params).promise();
-//     res.status(200).json({ message: "Transcription started" });
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
+module.exports = { startTranscriptionJob };

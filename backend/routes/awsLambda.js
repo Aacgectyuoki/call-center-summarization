@@ -1,8 +1,8 @@
 const express = require("express");
-const { invokeLambda } = require("../controllers/awsLambdaController");
+const { triggerLambdaTranscription } = require("../utils/awsLambdaUtils"); 
 
 const router = express.Router();
 
-router.post("/invoke", invokeLambda);
+router.post("/invoke", triggerLambdaTranscription);
 
 module.exports = router;

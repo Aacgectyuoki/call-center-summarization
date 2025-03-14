@@ -1,16 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const { upload, uploadFileToS3 } = require("../controllers/awsS3Controller");
-// const awsS3Controller = require("../controllers/awsS3Controller"); // Ensure this path is correct
-// const multer = require("multer");
+const multer = require("multer");
+const { uploadAudio } = require("../controllers/awsS3Controller");
 
-// const upload = multer({ storage: multer.memoryStorage() }); // Multer setup
+const upload = multer({ storage: multer.memoryStorage() });
 
-// // ✅ Route to upload a file to S3
-// router.post("/upload", upload.single("file"), awsS3Controller.uploadFile);
-
-// Upload file to AWS S3
-router.post("/upload", upload.single("file"), uploadFileToS3);
+// Upload file to AWS S3 and start transcription
+router.post("/upload", upload.single("file"), uploadAudio);
 
 module.exports = router;
 

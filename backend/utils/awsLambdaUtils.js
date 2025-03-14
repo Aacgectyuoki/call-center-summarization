@@ -34,9 +34,9 @@ const invokeLambda = async (functionName, payload) => {
 };
 
 // Define and export the triggerLambdaTranscription function
-const triggerLambdaTranscription = async (audioPath) => {
-    const functionName = "your-lambda-function-name"; // Replace with your actual Lambda function name
-    const payload = { audioPath }; // Adjust the payload as needed
+const triggerLambdaTranscription = async (audioUrl) => {
+    const functionName = "transcribeAudioFunction"; // Replace with your actual Lambda function name
+    const payload = { audioUrl }; // Adjust the payload as needed
     return await invokeLambda(functionName, payload);
 };
 

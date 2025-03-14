@@ -1,26 +1,38 @@
-const AWS = require("aws-sdk");
-const { saveTranscription } = require("./awsTranscribeUtils");
+const { TranscribeStreamingClient, StartStreamTranscriptionCommand } = require("@aws-sdk/client-transcribe-streaming");
+const mic = require("mic");
 
-AWS.config.update({ region: 'us-east-1' });
+const transcribeStreamClient = new TranscribeStreamingClient({ region: "us-east-1" });
 
-async function startRealTimeTranscription(audioStream) {
-    const transcribeService = new AWS.TranscribeService();
-    const connection = new WebSocket("wss://transcribestreaming.us-east-1.amazonaws.com");
+const startStreamingTranscription = async () => {
+    const micInstance = mic({
+        rate: "16000",
+        channels: "1",
+        encoding: "pcm",
+    });
 
-    connection.onopen = () => {
-        console.log("Connected to AWS Transcribe WebSocket.");
-        connection.send(audioStream);
-    };
+    const micInputStream = micInstance.getAudioStream();
+    micInstance.start();
 
-    connection.onmessage = (message) => {
-        const transcriptData = JSON.parse(message.data);
-        if (transcriptData && transcriptData.results) {
-            const transcriptText = transcriptData.results.transcripts.map(t => t.transcript).join(" ");
-            saveTranscription(transcriptText);
-        }
-    };
+    const command = new StartStreamTranscriptionCommand({
+        LanguageCode: "en-US",
+        MediaSampleRateHertz: 16000,
+        MediaEncoding: "pcm",
+        AudioStream: micInputStream,
+    });
 
-    connection.onerror = (error) => console.error("WebSocket Error:", error);
-}
+    try {
+        const audioStream = await transcribeStreamClient.send(command);
 
-module.exports = { startRealTimeTranscription };
+        micInputStream.pipe(audioStream); // ✅ Correct way to send audio
+
+        audioStream[Symbol.asyncIterator]().next().then(({ value }) => {
+            console.log("Live Transcription:", value.Transcript.Results);
+        });
+
+    } catch (error) {
+        console.error("Streaming transcription failed:", error);
+    }
+};
+
+module.exports = { startStreamingTranscription };
+

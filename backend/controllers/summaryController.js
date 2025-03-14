@@ -1,126 +1,17 @@
-const { summarizeText } = require('../utils/openaiUtils');
+const { summarizeText } = require("../utils/openaiUtils");
 
 const generateSummary = async (req, res) => {
     try {
-        const { transcription, transcriptionText } = req.body;
-        const text = transcription || transcriptionText; // Accept both field names
-
-        if (!text) {
-            return res.status(400).json({ error: 'No transcription provided' });
+        const { transcription, length, complexity, format } = req.body;
+        if (!transcription) {
+            return res.status(400).json({ error: "No transcription provided" });
         }
 
-        const summary = await summarizeText(text);
+        const summary = await summarizeText(transcription, length, complexity, format);
         res.json({ summary });
     } catch (error) {
-        console.error("Summarization Error:", error);
-        res.status(500).json({ error: 'Failed to generate summary' });
+        res.status(500).json({ error: "Failed to generate summary" });
     }
 };
 
-module.exports = { generateSummary, summarizeText };
-
-
-
-// const Summary = require("../models/Summary");
-// const Transcription = require("../models/Transcription");
-// const { summarizeText } = require("../utils/summaryUtils");
-
-// /**
-//  * Generates a summary for an existing transcription.
-//  */
-// const summarizeTranscription = async (req, res) => {
-//     try {
-//         const { transcriptionId } = req.body;
-
-//         // Check if the transcription exists
-//         const transcription = await Transcription.findById(transcriptionId);
-//         if (!transcription) {
-//             return res.status(404).json({ error: "Transcription not found." });
-//         }
-
-//         // Generate summary using OpenAI GPT
-//         const summaryResult = await summarizeText(transcription.transcription);
-
-//         if (!summaryResult || summaryResult.status === "failed") {
-//             return res.status(500).json({ error: "Summarization failed.", details: summaryResult.error });
-//         }
-
-//         // Save the summary in MongoDB
-//         const newSummary = new Summary({
-//             transcription: transcriptionId,
-//             summaryText: summaryResult.summary,
-//             bulletPoints: summaryResult.bulletPoints || [],
-//             sentiment: summaryResult.sentiment || "neutral",
-//             status: "completed"
-//         });
-
-//         await newSummary.save();
-
-//         return res.status(201).json({
-//             message: "Summarization completed successfully.",
-//             summary: newSummary
-//         });
-
-//     } catch (error) {
-//         console.error("Error generating summary:", error);
-//         return res.status(500).json({ error: "Internal server error." });
-//     }
-// };
-
-// /**
-//  * Retrieves all summaries from the database.
-//  */
-// const getSummaries = async (req, res) => {
-//     try {
-//         const summaries = await Summary.find().populate("transcription").sort({ createdAt: -1 });
-//         return res.status(200).json(summaries);
-//     } catch (error) {
-//         console.error("Error fetching summaries:", error);
-//         return res.status(500).json({ error: "Internal server error." });
-//     }
-// };
-
-// /**
-//  * Retrieves a single summary by ID.
-//  */
-// const getSummaryById = async (req, res) => {
-//     try {
-//         const summary = await Summary.findById(req.params.id).populate("transcription");
-//         if (!summary) {
-//             return res.status(404).json({ error: "Summary not found." });
-//         }
-//         return res.status(200).json(summary);
-//     } catch (error) {
-//         console.error("Error fetching summary:", error);
-//         return res.status(500).json({ error: "Internal server error." });
-//     }
-// };
-
-// /**
-//  * Creates a new summary.
-//  */
-// const createSummary = async (req, res) => {
-//     try {
-//         const { transcriptionId, summaryText, bulletPoints, sentiment } = req.body;
-
-//         const summary = new Summary({
-//             transcription: transcriptionId,
-//             summaryText,
-//             bulletPoints,
-//             sentiment,
-//             createdAt: new Date(),
-//         });
-
-//         await summary.save();
-//         res.status(201).json({ message: "Summary created successfully", summary });
-//     } catch (error) {
-//         res.status(500).json({ message: "Error creating summary", error });
-//     }
-// };
-
-// module.exports = {
-//     summarizeTranscription,
-//     getSummaries,
-//     getSummaryById,
-//     createSummary
-// };
+module.exports = { generateSummary };

@@ -14,7 +14,6 @@ if (!region || !bucketName) {
 const transcribeClient = new TranscribeClient({ region: envConfig.AWS_REGION });
 
 const startTranscription = async (audioUrl, jobName) => {
-    // const jobName = `transcription-${Date.now()}`; // Generate unique name
     const params = {
         TranscriptionJobName: jobName,
         LanguageCode: "en-US",
@@ -54,45 +53,4 @@ const saveTranscriptionJob = async (jobId, originalFileName, s3FileName) => {
     }
 };
 
-module.exports = { saveTranscriptionJob };
-
-// const pollTranscriptionJob = async (jobName) => {
-//     while (true) {
-//         const command = new GetTranscriptionJobCommand({ TranscriptionJobName: jobName });
-//         const response = await transcribeClient.send(command);
-
-//         const status = response.TranscriptionJob.TranscriptionJobStatus;
-//         if (status === "COMPLETED") {
-//             return response.TranscriptionJob.Transcript.TranscriptFileUri;
-//         }
-//         if (status === "FAILED") {
-//             throw new Error("Transcription job failed");
-//         }
-
-//         console.log("Waiting for transcription...");
-//         await new Promise((resolve) => setTimeout(resolve, 5000)); // Poll every 5 sec
-//     }
-// };
-// const startTranscription = async (audioUrl, jobName) => {
-//     const params = {
-//         TranscriptionJobName: jobName,
-//         LanguageCode: LanguageCode.EN_US, // Use the LanguageCode enum
-//         MediaFormat: MediaFormat.MP3, // Use the MediaFormat enum
-//         Media: {
-//             MediaFileUri: audioUrl, // S3 URL of uploaded audio
-//         },
-//         OutputBucketName: bucketName, // Store transcript in the same bucket
-//     };
-
-//     try {
-//         const command = new StartTranscriptionJobCommand(params);
-//         await transcribeClient.send(command);
-//         return { message: "Transcription started successfully", jobName };
-//     } catch (error) {
-//         console.error("Error starting transcription:", error);
-//         throw new Error("Failed to start transcription");
-//     }
-// };
-
-module.exports = { startTranscription };
-    // , pollTranscriptionJob };
+module.exports = { saveTranscriptionJob, startTranscription };

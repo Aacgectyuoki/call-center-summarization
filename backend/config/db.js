@@ -39,4 +39,4 @@ const getDB = () => {
     return db;
 };
 
-module.exports = { connectDB, getDB }; // ✅ Ensure correct exports
+module.exports = { connectDB, getDB }; 

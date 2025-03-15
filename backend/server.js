@@ -59,8 +59,3 @@ app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
 app.get("/", (req, res) => {
   res.status(200).json({ message: "Server is running" });
 });
-
-// app.use((req, res, next) => {
-//   console.log(`[${req.method}] ${req.url}`);
-//   next();
-// });

@@ -2,11 +2,9 @@ const Transcription = require("../models/Transcription");
 const { getSignedUrlForFile } = require("../utils/awsS3Utils");
 const { summarizeText } = require("../utils/openaiUtils");
 const axios = require("axios");
-// const { startTranscription } = require("../utils/awsTranscribeUtils");
 const { TranscribeClient, GetTranscriptionJobCommand } = require("@aws-sdk/client-transcribe");
 
 const transcribeClient = new TranscribeClient({ region: process.env.AWS_REGION });
-
 
 const { saveTranscriptionJob } = require("../utils/transcriptionUtils");
 
@@ -60,7 +58,6 @@ exports.getTranscriptionText = async (req, res) => {
     }
 };
 
-
 exports.summarizeTranscription = async (req, res) => {
     const { jobName } = req.body;
 
@@ -101,6 +98,10 @@ exports.checkTranscriptionStatus = async (req, res) => {
         const response = await transcribeClient.send(command);
         console.log("AWS Transcribe Response:", response); // ✅ Debugging Log
 
+        if (!response.TranscriptionJob) {
+            return res.status(404).json({ message: "Transcription job not found" });
+        }
+
         res.status(200).json({
             jobName,
             status: response.TranscriptionJob.TranscriptionJobStatus,
@@ -111,40 +112,3 @@ exports.checkTranscriptionStatus = async (req, res) => {
         res.status(500).json({ message: "Failed to check transcription status", error: error.message });
     }
 };
-
-
-
-// exports.transcribeAudio = async (req, res) => {
-//     try {
-//         const { audioUrl } = req.body;
-//         if (!audioUrl) {
-//             return res.status(400).json({ message: "Audio URL is required" });
-//         }
-
-//         // Extract filename from S3 URL
-//         const fileName = audioUrl.split("/").pop();
-//         const jobName = `transcription-${Date.now()}`;
-
-//         // Store transcription details in MongoDB before starting
-//         const newTranscription = new Transcription({
-//             jobId: jobName,
-//             originalFileName: fileName,
-//             s3FileName: audioUrl, // Store full S3 path
-//             transcriptionStatus: "pending"
-//         });
-
-//         await newTranscription.save();
-
-//         // Start transcription
-//         const response = await startTranscription(audioUrl, jobName);
-
-//         res.status(200).json({
-//             message: "Transcription job started",
-//             jobName,
-//             response
-//         });
-//     } catch (error) {
-//         console.error("Transcription Error:", error);
-//         res.status(500).json({ message: "Failed to start transcription", error: error.message });
-//     }
-// };

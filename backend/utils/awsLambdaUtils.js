@@ -1,5 +1,6 @@
 const { LambdaClient, InvokeCommand } = require("@aws-sdk/client-lambda");
 require("dotenv").config();
+const envConfig = require("../config/envConfig");
 
 const region = process.env.AWS_REGION;
 const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
@@ -34,10 +35,19 @@ const invokeLambda = async (functionName, payload) => {
 };
 
 // Define and export the triggerLambdaTranscription function
+// const triggerLambdaTranscription = async (audioUrl) => {
+//     const functionName = "transcribeAudioFunction"; // Replace with your actual Lambda function name
+//     const payload = { audioUrl }; // Adjust the payload as needed
+//     return await invokeLambda(functionName, payload);
+// };
+
+// Use environment variables instead of hardcoded function names
 const triggerLambdaTranscription = async (audioUrl) => {
-    const functionName = "transcribeAudioFunction"; // Replace with your actual Lambda function name
-    const payload = { audioUrl }; // Adjust the payload as needed
-    return await invokeLambda(functionName, payload);
+    return await invokeLambda(envConfig.TRANSCRIBE_LAMBDA, { audioUrl });
 };
 
-module.exports = { invokeLambda, triggerLambdaTranscription };
+const generateSummaryWithLambda = async (transcriptionText) => {
+    return await invokeLambda(envConfig.SUMMARY_LAMBDA, { transcriptionText });
+};
+
+module.exports = { invokeLambda, triggerLambdaTranscription, generateSummaryWithLambda };

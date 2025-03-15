@@ -1,5 +1,12 @@
+const { v4: uuidv4 } = require("uuid");
 const multer = require("multer");
 const path = require("path");
+
+// Function to generate a unique filename
+const generateFileName = (originalName, userId = "guest") => {
+    const fileExtension = originalName.split(".").pop();
+    return `${userId}-${uuidv4()}.${fileExtension}`;
+};
 
 // Storage configuration
 const storage = multer.diskStorage({
@@ -7,7 +14,10 @@ const storage = multer.diskStorage({
         cb(null, "uploads/");
     },
     filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${file.originalname}`);
+        // Use user ID if available
+        const userId = req.user ? req.user.id : "guest";
+        const uniqueFileName = generateFileName(file.originalname, userId);
+        cb(null, uniqueFileName);
     }
 });
 
@@ -28,4 +38,4 @@ const upload = multer({
     limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
 });
 
-module.exports = upload;
+module.exports = { upload, generateFileName };

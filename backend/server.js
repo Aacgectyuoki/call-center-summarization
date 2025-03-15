@@ -27,13 +27,15 @@ app.use(timerMiddleware);
 const callRoutes = require("./routes/calls");
 const summaryRoutes = require("./routes/summaries");
 const transcriptionRoutes = require("./routes/transcriptions");
+const awsTranscribeRoutes = require("./routes/awsTranscribe");
 const videoRoutes = require("./routes/video");
 
 // Use Routes
 app.use("/api/calls", callRoutes);
 app.use("/api/summaries", summaryRoutes);
 app.use("/api/transcriptions", transcriptionRoutes);
-app.use("/api/videos", videoRoutes);
+app.use("/api/aws", awsTranscribeRoutes);
+app.use("/api/video", videoRoutes);
 app.use("/aws", awsRoutes);
 app.use("/aws/s3", awsS3Routes); // ✅ Fix: Add this back for file uploads!
 app.use("/uploads", express.static("uploads"));

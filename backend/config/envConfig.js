@@ -8,6 +8,10 @@ const envConfig = {
   AWS_REGION: process.env.AWS_REGION || "us-east-1",
   S3_BUCKET_NAME: process.env.S3_BUCKET_NAME || "",
   AWS_TRANSCRIBE_LANGUAGE: process.env.AWS_TRANSCRIBE_LANGUAGE || "en-US",
+  TRANSCRIBE_LAMBDA: process.env.TRANSCRIBE_LAMBDA || "startTranscription",
+  SUMMARY_LAMBDA: process.env.SUMMARY_LAMBDA || "generateSummary",
+  PROCESS_TRANSCRIPTION_LAMBDA: process.env.PROCESS_TRANSCRIPTION_LAMBDA || "processTranscriptionJob",
+  CONVERT_VIDEO_LAMBDA: process.env.CONVERT_VIDEO_LAMBDA || "convertVideoToAudio",
 };
 
 module.exports = envConfig;

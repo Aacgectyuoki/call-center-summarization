@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import FileUploader from "./components/FileUploader";
-import { transcribeFile, checkTranscriptionStatus, getTranscriptionText, summarizeText } from "./api";
+import { uploadFile, transcribeFile, checkTranscriptionStatus, getTranscriptionText, summarizeText } from "./api";
 
 const App = () => {
   const [jobName, setJobName] = useState("");
@@ -8,15 +8,23 @@ const App = () => {
   const [summary, setSummary] = useState("");
   const [status, setStatus] = useState("");
 
-  const handleFileUpload = async (s3Url) => {
+  // This function gets called after a file is uploaded
+  const handleFileUpload = async (file) => {
     try {
-      const response = await transcribeFile(s3Url);
-      setJobName(response.data.jobName);
+      const response = await uploadFile(file);
+      const { s3Url } = response.data; // Ensure we get s3Url
+      const fileId = file.name; // Using file name as an ID (change if needed)
+  
+      setJobName(""); // Reset previous job
+      setStatus("Uploading...");
+  
+      const transcribeResponse = await transcribeFile(fileId, s3Url);
+      setJobName(transcribeResponse.data.jobName);
       setStatus("Transcription started...");
     } catch (error) {
       console.error("Transcription Error:", error);
     }
-  };
+  };  
 
   const checkStatus = async () => {
     if (!jobName) return;
@@ -36,21 +44,22 @@ const App = () => {
     setSummary(response.data.summary);
   };
 
-  // ✅ Auto-check transcription status every 5 sec
+  // Auto-check transcription status every 5 sec
   useEffect(() => {
     if (jobName && status !== "COMPLETED") {
       const interval = setInterval(() => {
         checkStatus();
-      }, 5000); // ✅ Check status every 5 sec
+      }, 5000);
 
-      return () => clearInterval(interval); // ✅ Cleanup function
+      return () => clearInterval(interval);
     }
-  }, [jobName, status]); // ✅ Runs whenever jobName or status changes
+  }, [jobName, status]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-6 space-y-4">
       <h1 className="text-3xl font-bold text-gray-800">Call Center Summarization</h1>
-
+      
+      {/* Pass handleFileUpload to FileUploader */}
       <FileUploader onFileUpload={handleFileUpload} />
 
       {jobName && (

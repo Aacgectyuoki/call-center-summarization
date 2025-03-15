@@ -7,17 +7,15 @@ const FileUploader = ({ onFileUpload }) => {
 
   const handleUpload = async () => {
     if (!file) return setMessage("Please select a file");
-
+  
     try {
-      const response = await uploadFile(file);
-      const { s3Url } = response.data;
-
+      setMessage("Uploading...");
+      await onFileUpload(file); // Pass entire file
       setMessage("File uploaded successfully!");
-      onFileUpload(file.name, s3Url);
     } catch (error) {
       setMessage("Upload failed!");
     }
-  };
+  };  
 
   return (
     <div className="p-6 bg-gray-100 rounded-lg shadow-md">

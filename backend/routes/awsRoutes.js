@@ -34,7 +34,7 @@ router.get("/transcription-status", checkTranscriptionStatus);
 router.get("/transcription-text", getTranscriptionText);
 
 // Summarize Transcription
-router.post("/summarize-transcription", summarizeTranscription);
+// router.post("/summarize-transcription", summarizeTranscription);
 
 // // AWS Transcribe - Start Transcription
 // router.post("/transcribe", transcribeAudio);

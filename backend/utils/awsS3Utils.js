@@ -1,8 +1,25 @@
 const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 const { generateFileName } = require("./fileHandler"); // Import function
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 require("dotenv").config();
 
 const s3Client = new S3Client({ region: process.env.AWS_REGION });
+
+async function getSignedUrlForFile(fileName) {
+    const command = new GetObjectCommand({
+        Bucket: process.env.S3_BUCKET_NAME, // Ensure the bucket name is correct
+        Key: fileName
+    });
+
+    try {
+        const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+        console.log("🔗 Signed URL:", url);
+        return url;
+    } catch (error) {
+        console.error("❌ Failed to generate signed URL:", error);
+        throw new Error("Failed to generate signed URL");
+    }
+}
 
 async function uploadFileToS3(fileBuffer, originalName, fileType, userId = "guest") {
     const bucketName = process.env.S3_BUCKET_NAME;
@@ -31,4 +48,4 @@ async function uploadFileToS3(fileBuffer, originalName, fileType, userId = "gues
     }
 }
 
-module.exports = { uploadFileToS3 };
+module.exports = { uploadFileToS3, getSignedUrlForFile };

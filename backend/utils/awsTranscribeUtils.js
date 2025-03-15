@@ -2,6 +2,8 @@ const { TranscribeClient, StartTranscriptionJobCommand, GetTranscriptionJobComma
 require("dotenv").config();
 const envConfig = require("../config/envConfig");
 
+const { getDB } = require("../config/db");
+
 const region = process.env.AWS_REGION;
 const bucketName = process.env.S3_BUCKET_NAME;
 
@@ -30,6 +32,29 @@ const startTranscription = async (audioUrl, jobName) => {
         throw new Error("Failed to start transcription job");
     }
 };
+
+const saveTranscriptionJob = async (jobId, originalFileName, s3FileName) => {
+    try {
+        const db = getDB();
+        const transcriptionCollection = db.collection("transcriptions");
+
+        const newTranscription = {
+            jobId,
+            originalFileName,
+            s3FileName,
+            createdAt: new Date(),
+        };
+
+        const result = await transcriptionCollection.insertOne(newTranscription);
+        console.log("✅ Transcription saved:", result.insertedId);
+        return result;
+    } catch (error) {
+        console.error("❌ Failed to save transcription job:", error);
+        throw new Error("Database insertion failed");
+    }
+};
+
+module.exports = { saveTranscriptionJob };
 
 // const pollTranscriptionJob = async (jobName) => {
 //     while (true) {

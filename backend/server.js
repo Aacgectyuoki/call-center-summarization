@@ -33,8 +33,9 @@ const videoRoutes = require("./routes/video");
 // Use Routes
 app.use("/api/calls", callRoutes);
 app.use("/api/summaries", summaryRoutes);
-app.use("/api/transcriptions", transcriptionRoutes);
-app.use("/api/aws", awsTranscribeRoutes);
+// app.use("/api/transcriptions", transcriptionRoutes);
+app.use("/api/aws", transcriptionRoutes);
+// app.use("/api/aws", awsTranscribeRoutes);
 app.use("/api/video", videoRoutes);
 app.use("/aws", awsRoutes);
 app.use("/aws/s3", awsS3Routes); // ✅ Fix: Add this back for file uploads!

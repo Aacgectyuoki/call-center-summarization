@@ -3,7 +3,10 @@ import react from "@vitejs/plugin-react-swc";
 
 export default defineConfig({
   plugins: [react()],
+  server: {
+    port: 5173, // Default Vite port
+  },
   define: {
-    "import.meta.env": {}, // ✅ Fix TypeScript error
+    'process.env': process.env, // Use actual environment variables
   },
 });

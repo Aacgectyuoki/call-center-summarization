@@ -1,34 +1,69 @@
-import React, { useState } from "react";
-import { uploadFile, transcribeFile } from "../api";
+import { useState } from "react";
+import axios from "axios";
+import React from "react";
 
-const FileUploader = ({ onFileUpload }) => {
-  const [file, setFile] = useState(null);
-  const [message, setMessage] = useState("");
+const FileUploader = ({ onUploadSuccess }) => {
+    const [file, setFile] = useState(null);
+    const [uploadStatus, setUploadStatus] = useState("");
+    const [loading, setLoading] = useState(false);
 
-  const handleUpload = async () => {
-    if (!file) return setMessage("Please select a file");
-  
-    try {
-      setMessage("Uploading...");
-      await onFileUpload(file); // Pass entire file
-      setMessage("File uploaded successfully!");
-    } catch (error) {
-      setMessage("Upload failed!");
-    }
-  };  
+    const handleFileChange = (event) => {
+        setFile(event.target.files[0]);
+    };
 
-  return (
-    <div className="p-6 bg-gray-100 rounded-lg shadow-md">
-      <input type="file" onChange={(e) => setFile(e.target.files[0])} />
-      <button
-        onClick={handleUpload}
-        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
-      >
-        Upload
-      </button>
-      {message && <p className="mt-2 text-gray-700">{message}</p>}
-    </div>
-  );
+    const handleUpload = async () => {
+        if (!file) {
+            setUploadStatus("No file selected!");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+            setLoading(true);
+            setUploadStatus("Uploading...");
+
+            const response = await axios.post(
+                "http://localhost:5000/api/aws/upload",
+                formData,
+                {
+                    headers: { "Content-Type": "multipart/form-data" },
+                }
+            );
+
+            console.log("Upload Response:", response.data);
+            setUploadStatus("Upload successful!");
+
+            if (onUploadSuccess) {
+                onUploadSuccess(response.data);
+            }
+        } catch (error) {
+            console.error("Upload Error:", error);
+            setUploadStatus("Upload failed!");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="p-6 bg-white shadow-lg rounded-lg w-full max-w-md mx-auto text-center">
+            <h2 className="text-xl font-bold text-gray-800">Upload an Audio File</h2>
+            <input 
+                type="file" 
+                onChange={handleFileChange} 
+                className="mt-3 border border-gray-300 p-2 rounded w-full"
+            />
+            <button
+                onClick={handleUpload}
+                className="mt-4 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded w-full"
+                disabled={loading}
+            >
+                {loading ? "Uploading..." : "Upload"}
+            </button>
+            {uploadStatus && <p className="mt-3 text-gray-600">{uploadStatus}</p>}
+        </div>
+    );
 };
 
 export default FileUploader;

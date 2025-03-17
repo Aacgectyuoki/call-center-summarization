@@ -33,31 +33,4 @@ router.get("/transcription-status", checkTranscriptionStatus);
 // Fetch Transcription Text
 router.get("/transcription-text", getTranscriptionText);
 
-// Summarize Transcription
-// router.post("/summarize-transcription", summarizeTranscription);
-
-// // AWS Transcribe - Start Transcription
-// router.post("/transcribe", transcribeAudio);
-
-// // Summarization API (GPT-4)
-// router.post("/summarize", generateSummary);
-
-// // AWS Lambda for Audio Processing
-// router.post("/lambda/process-audio", processAudioLambda);
-
-// // Upload file to AWS S3 and start transcription
-// router.post("/upload", upload.single("file"), uploadAudio);
-
-// // Transcribe by File ID
-// // router.post("/transcribe/:fileId", transcribeByFileId);
-
-// // Check Transcription Status
-// router.get("/transcription-status", checkTranscriptionStatus);
-
-// // Fetch Transcription Text
-// router.get("/transcription-text", getTranscriptionText);
-
-// // Summarize Transcription
-// router.post("/summarize-transcription", summarizeTranscription);
-
 module.exports = router;

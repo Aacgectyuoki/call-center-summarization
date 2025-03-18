@@ -14,26 +14,55 @@ const App = () => {
         format: "regular",
     });
 
+    // ✅ Debugging: Log when jobName is set
     const handleUploadSuccess = (data) => {
+        console.log("✅ Upload Success - Transcription Job ID:", data);
         setJobName(data.transcriptionJobId);
         setStatus("Processing...");
     };
 
     const handleCheckStatus = async () => {
-        if (!jobName) return;
+        if (!jobName) {
+            console.warn("⚠️ No jobName found. Cannot check status.");
+            return;
+        }
+
+        console.log("🔄 Checking status for job:", jobName);
         const response = await checkTranscriptionStatus(jobName);
+        console.log("✅ Status Response:", response.data);
+
         setStatus(response.data.status);
     };
 
     const handleFetchTranscription = async () => {
-        if (!jobName) return;
+        if (!jobName) {
+            console.warn("⚠️ No jobName found. Cannot fetch transcription.");
+            return;
+        }
+
+        console.log("🔄 Fetching transcription for job:", jobName);
         const response = await getTranscriptionText(jobName);
+        console.log("✅ Transcription Response:", response.data);
+
         setTranscription(response.data.transcriptText);
     };
 
     const handleSummarize = async () => {
-        if (!transcription) return;
+        if (!transcription) {
+            console.warn("⚠️ No transcription found. Cannot summarize.");
+            return;
+        }
+
+        console.log("🔄 Summarizing transcription:", transcription);
         const response = await summarizeText(jobName, summarySettings.length, summarySettings.complexity, summarySettings.format);
+        
+        console.log("✅ Summary Response:", response.data);
+        
+        // Debugging: Check if summary exists and has the expected format
+        if (!response.data.summary) {
+            console.error("❌ Summary data is missing:", response.data);
+        }
+
         setSummary(response.data.summary);
     };
 
@@ -76,7 +105,9 @@ const App = () => {
             {summary && (
                 <div className="mt-4 p-4 bg-gray-200 shadow-md rounded-lg w-full max-w-xl">
                     <h2 className="font-bold text-lg">Summary:</h2>
-                    <p className="text-gray-700">{summary}</p>
+                    <p className="text-gray-700">
+                        {typeof summary === "string" ? summary : summary.text}
+                    </p>
                 </div>
             )}
         </div>

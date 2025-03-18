@@ -1,64 +1,71 @@
 const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
-const { ChatOpenAI } = require("langchain/chat_models/openai");
-const { PromptTemplate } = require("langchain/prompts");
+const { ChatOpenAI } = require("@langchain/openai");
 const { LLMChain } = require("langchain/chains");
-const { pipeline } = require("stream/promises");
-const { StringDecoder } = require("string_decoder");
+const { PromptTemplate } = require("@langchain/core/prompts");
+
+const { Readable } = require("stream");
 
 const s3Client = new S3Client({ region: process.env.AWS_REGION });
+const bucket = process.env.S3_BUCKET_NAME;
 
-// Convert S3 file stream to string
+/**
+ * Convert S3 file stream to a string.
+ */
 const streamToString = async (stream) => {
-    const decoder = new StringDecoder("utf8");
-    let data = "";
-
+    const chunks = [];
     for await (const chunk of stream) {
-        data += decoder.write(chunk);
+        chunks.push(chunk);
     }
-    data += decoder.end();
-    return data;
+    return Buffer.concat(chunks).toString("utf8");
 };
 
-// Fetch transcription from S3
+/**
+ * Fetch transcription from S3.
+ */
 const fetchS3File = async (bucket, key) => {
     try {
+        console.log("Fetching S3 file with Key:", key); // ✅ Debugging key before fetching
+
         const command = new GetObjectCommand({ Bucket: bucket, Key: key });
         const response = await s3Client.send(command);
         const data = await streamToString(response.Body);
-        return JSON.parse(data);
+        const jsonData = JSON.parse(data);
+
+        // Ensure correct data structure
+        if (!jsonData.results || !jsonData.results.transcripts || !jsonData.results.transcripts.length) {
+            throw new Error("Invalid transcription format");
+        }
+
+        return jsonData.results.transcripts.map(t => t.transcript).join(" ");
     } catch (error) {
         console.error("❌ S3 Fetch Error:", error);
         throw new Error("Failed to fetch transcription data");
     }
 };
 
-// Generate Summary using LangChain
+
+/**
+ * Generate Summary using LangChain.
+ */
 const generateSummary = async (req, res) => {
     try {
         const { jobName, length = "regular", complexity = "regular", format = "regular" } = req.body;
+
         if (!jobName) {
-            return res.status(400).json({ error: "Missing jobName parameter" });
+            return res.status(400).json({ message: "jobName is required" });
         }
 
-        // Fetch transcription from S3
-        const transcriptionData = await fetchS3File(process.env.S3_BUCKET_NAME, `${jobName}.json`);
+        // ✅ Use jobName to fetch the file from S3
+        const key = `${jobName}.json`;
+        console.log("Generated S3 Key:", key); // Debug log before calling fetchS3File
 
-        // Extract transcript text
-        if (!transcriptionData.results?.transcripts?.length) {
-            return res.status(400).json({ error: "Invalid transcription format" });
-        }
-        const fullText = transcriptionData.results.transcripts.map(t => t.transcript).join(" ");
+        const transcription = await fetchS3File(bucket, key);
 
-        if (!fullText.trim()) {
-            return res.status(400).json({ error: "Empty transcript detected" });
+        if (!transcription || !transcription.trim()) {
+            return res.status(400).json({ message: "Empty or invalid transcription data" });
         }
 
-        // Call AI summarization function with user preferences
-        const model = new ChatOpenAI({
-            openAIApiKey: process.env.OPENAI_API_KEY,
-            temperature: 0.5,
-            maxTokens: 1000, // 🔥 Increased token limit for detailed summaries
-        });
+        const model = new ChatOpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
         const prompt = new PromptTemplate({
             template: `Summarize the following transcript based on the given preferences:
@@ -79,7 +86,7 @@ const generateSummary = async (req, res) => {
             length,
             complexity,
             format,
-            transcript: fullText,
+            transcript: transcription,
         });
 
         res.json({ summary });

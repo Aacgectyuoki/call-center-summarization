@@ -1,17 +1,12 @@
-const Transcription = require("../models/Transcription");
 const { getSignedUrlForFile } = require("../utils/awsS3Utils");
-const { generateSummary } = require("../controllers/summaryController"); // Use LangChain summarization
+const axios = require("axios");
 const { TranscribeClient, GetTranscriptionJobCommand } = require("@aws-sdk/client-transcribe");
-const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
+const { generateSummary } = require("../controllers/summaryController"); // Use LangChain summarization
 
 const transcribeClient = new TranscribeClient({ region: process.env.AWS_REGION });
-const s3Client = new S3Client({ region: process.env.AWS_REGION });
 
 const { saveTranscriptionJob } = require("../utils/transcriptionUtils");
 
-/**
- * 🚀 **Start Transcription Job**
- */
 exports.transcribeAudio = async (req, res) => {
     try {
         const { audioUrl, fileId } = req.body;
@@ -31,13 +26,14 @@ exports.transcribeAudio = async (req, res) => {
             s3Url: audioUrl,
         });
     } catch (error) {
-        console.error("❌ Transcription Error:", error);
+        console.error("Transcription Error:", error);
         res.status(500).json({ message: "Failed to start transcription", error: error.message });
     }
 };
 
 /**
- * 🎤 **Fetch Transcribed Text (Using AWS SDK, No Axios)**
+ * Fetch Transcribed Text
+ * Retrieves the transcription text from the S3 bucket.
  */
 exports.getTranscriptionText = async (req, res) => {
     const { jobName } = req.query;
@@ -47,30 +43,22 @@ exports.getTranscriptionText = async (req, res) => {
     }
 
     try {
-        const command = new GetObjectCommand({
-            Bucket: process.env.S3_BUCKET_NAME,
-            Key: `${jobName}.json`,
-        });
+        const fileName = `${jobName}.json`;
+        const signedUrl = await getSignedUrlForFile(fileName);
+        const response = await axios.get(signedUrl);
 
-        const { Body } = await s3Client.send(command);
-        const transcriptionData = await streamToString(Body);
-
-        const parsedData = JSON.parse(transcriptionData);
-        const transcriptText = parsedData?.results?.transcripts[0]?.transcript || "";
-
-        if (!transcriptText.trim()) {
-            return res.status(400).json({ message: "No transcription found" });
-        }
+        const transcriptText = response.data.results.transcripts[0].transcript || "";
+        if (!transcriptText) return res.status(400).json({ message: "No transcription found" });
 
         res.status(200).json({ jobName, transcriptText });
     } catch (error) {
-        console.error("❌ Error fetching transcription:", error);
+        console.error("Error fetching transcription:", error);
         res.status(500).json({ message: "Failed to retrieve transcription", error: error.message });
     }
 };
 
 /**
- * 📝 **Summarize Transcription (Uses LangChain)**
+ * Summarize Transcription (Now uses LangChain)
  */
 exports.summarizeTranscription = async (req, res) => {
     const { jobName, length = "regular", complexity = "regular", format = "regular" } = req.body;
@@ -88,13 +76,13 @@ exports.summarizeTranscription = async (req, res) => {
             summary,
         });
     } catch (error) {
-        console.error("❌ Error summarizing transcription:", error);
+        console.error("Error summarizing transcription:", error);
         res.status(500).json({ message: "Failed to summarize transcription", error: error.message });
     }
 };
 
 /**
- * 📊 **Check Transcription Status**
+ * Check Transcription Status
  */
 exports.checkTranscriptionStatus = async (req, res) => {
     const { jobName } = req.query;
@@ -118,15 +106,6 @@ exports.checkTranscriptionStatus = async (req, res) => {
         });
     } catch (error) {
         console.error("❌ Error checking transcription status:", error);
-        res.status(500).json({ message: "Failed to check transcription status", error: error.message });
+        res.status(500).json({ message: "Failed to check transcription status" });
     }
-};
-
-/**
- * 📥 **Utility: Convert AWS S3 Stream to String**
- */
-const streamToString = async (stream) => {
-    const chunks = [];
-    for await (const chunk of stream) chunks.push(chunk);
-    return Buffer.concat(chunks).toString("utf8");
 };

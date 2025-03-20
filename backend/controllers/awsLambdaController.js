@@ -1,12 +1,15 @@
-const AWS = require("aws-sdk");
+const { LambdaClient, InvokeCommand } = require("@aws-sdk/client-lambda");
 const { exec } = require("child_process");
 const { uploadFileToS3 } = require("../utils/awsS3Utils");
-const { triggerLambdaTranscription } = require("../utils/awsLambdaUtils");
 const { invokeLambda } = require("../utils/awsLambdaUtils");
 const envConfig = require("../config/envConfig");
 
-AWS.config.update({ region: "us-east-1" });
+// Initialize AWS Lambda Client (SDK v3)
+const lambdaClient = new LambdaClient({ region: "us-east-1" });
 
+/**
+ * Convert MP4 to Audio (Calls AWS Lambda)
+ */
 const processMP4Upload = async (req, res) => {
     try {
         const file = req.file;
@@ -15,11 +18,19 @@ const processMP4Upload = async (req, res) => {
         const s3Url = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${file.filename}`;
 
         // Invoke Convert Video Lambda
-        const videoToAudioResponse = await invokeLambda(envConfig.CONVERT_VIDEO_LAMBDA, { s3Url });
-        
+        const lambdaParams = {
+            FunctionName: envConfig.CONVERT_VIDEO_LAMBDA,
+            Payload: JSON.stringify({ s3Url }),
+        };
+
+        const lambdaResponse = await lambdaClient.send(new InvokeCommand(lambdaParams));
+        const responsePayload = JSON.parse(Buffer.from(lambdaResponse.Payload).toString("utf-8"));
+
+        if (!responsePayload.audioUrl) throw new Error("Lambda did not return audio URL");
+
         res.json({
             message: "MP4 processed & uploaded",
-            audioUrl: videoToAudioResponse.audioUrl
+            audioUrl: responsePayload.audioUrl,
         });
     } catch (error) {
         console.error("❌ MP4 Processing Error:", error);
@@ -27,6 +38,10 @@ const processMP4Upload = async (req, res) => {
     }
 };
 
+
+/**
+ * Transcribe Audio using AWS Lambda
+ */
 const processAudioLambda = async (req, res) => {
     try {
         const { audioUrl } = req.body;
@@ -34,12 +49,20 @@ const processAudioLambda = async (req, res) => {
             return res.status(400).json({ error: "Audio file URL is required" });
         }
 
-        const response = await invokeLambda(envConfig.TRANSCRIBE_LAMBDA, { audioUrl });
-        res.json(response);
+        // Invoke Transcribe Lambda
+        const lambdaParams = {
+            FunctionName: envConfig.TRANSCRIBE_LAMBDA,
+            Payload: JSON.stringify({ audioUrl }),
+        };
+
+        const lambdaResponse = await lambdaClient.send(new InvokeCommand(lambdaParams));
+        const responsePayload = JSON.parse(Buffer.from(lambdaResponse.Payload).toString("utf-8"));
+
+        res.json(responsePayload);
     } catch (error) {
         console.error("❌ Error processing audio with Lambda:", error);
         res.status(500).json({ error: "Failed to process audio with Lambda" });
     }
 };
 
-module.exports = { processMP4Upload, processAudioLambda }
+module.exports = { processMP4Upload, processAudioLambda };

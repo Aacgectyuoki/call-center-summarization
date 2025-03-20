@@ -50,4 +50,30 @@ async function getSignedUrlForFile(fileName) {
     }
 }
 
-module.exports = { uploadFileToS3, getSignedUrlForFile };
+/**
+ * ✅ Fetch transcription from S3
+ */
+async function fetchS3File(bucket, key) {
+    try {
+        console.log("📡 Fetching S3 file:", key);
+
+        const command = new GetObjectCommand({ Bucket: bucket, Key: key });
+        const response = await s3Client.send(command);
+
+        const streamToString = async (stream) => {
+            const chunks = [];
+            for await (const chunk of stream) {
+                chunks.push(chunk);
+            }
+            return Buffer.concat(chunks).toString("utf8");
+        };
+
+        const data = await streamToString(response.Body);
+        return JSON.parse(data).results.transcripts.map(t => t.transcript).join(" ");
+    } catch (error) {
+        console.error("❌ S3 Fetch Error:", error);
+        throw new Error("Failed to fetch transcription data");
+    }
+}
+
+module.exports = { uploadFileToS3, getSignedUrlForFile, fetchS3File };

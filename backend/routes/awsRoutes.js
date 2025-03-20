@@ -1,6 +1,6 @@
 const express = require("express");
 const multer = require("multer");
-const { triggerLambdaTranscription } = require("../utils/awsLambdaUtils");
+// const { triggerLambdaTranscription } = require("../utils/awsLambdaUtils");
 const { generateSummary } = require("../controllers/summaryController");
 const { processAudioLambda } = require("../controllers/awsLambdaController");
 const { uploadAudio, getTranscriptionUrl, getS3FileUrl } = require("../controllers/awsS3Controller");

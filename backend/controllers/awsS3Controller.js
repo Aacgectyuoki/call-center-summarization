@@ -1,18 +1,16 @@
-const AWS = require("aws-sdk");
+const { S3Client, PutObjectCommand, GetObjectCommand } = require("@aws-sdk/client-s3");
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const { uploadFileToS3 } = require("../utils/awsS3Utils");
 const { startTranscriptionJob } = require("./awsTranscribeController");
 
 const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME || "dtsummarizr-audio1";
 const REGION = process.env.AWS_REGION || "us-east-1";
 
-// Configure AWS S3
-const s3 = new AWS.S3({
-    region: REGION,
-    signatureVersion: "v4",
-});
+// ✅ Use AWS SDK v3
+const s3Client = new S3Client({ region: REGION });
 
 /**
- * Uploads an audio file to S3 and starts transcription.
+ * ✅ Uploads an audio file to S3 and starts transcription.
  */
 const uploadAudio = async (req, res) => {
     try {
@@ -33,7 +31,7 @@ const uploadAudio = async (req, res) => {
 };
 
 /**
- * Generates a public URL for an S3 object (signed or direct).
+ * ✅ Generates a signed URL for an S3 object.
  */
 const getTranscriptionUrl = async (req, res) => {
     try {
@@ -42,14 +40,13 @@ const getTranscriptionUrl = async (req, res) => {
 
         const fileKey = `${jobName}.json`;
 
-        // Use a Signed URL (valid for 1 hour) - more secure
-        const params = {
+        // ✅ Use AWS SDK v3 Presigned URL
+        const command = new GetObjectCommand({
             Bucket: S3_BUCKET_NAME,
             Key: fileKey,
-            Expires: 3600, // 1 hour expiration
-        };
+        });
 
-        const url = await s3.getSignedUrlPromise("getObject", params);
+        const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
 
         res.json({ s3Url: url });
     } catch (error) {
@@ -58,20 +55,20 @@ const getTranscriptionUrl = async (req, res) => {
     }
 };
 
+/**
+ * ✅ Returns a direct S3 file URL (not signed)
+ */
 const getS3FileUrl = async (req, res) => {
     try {
-        const { jobName } = req.query;  // Extract jobName from query
+        const { jobName } = req.query;
         if (!jobName) {
             return res.status(400).json({ error: "Missing jobName parameter" });
         }
 
-        // Construct the S3 URL
-        const s3Bucket = process.env.S3_BUCKET_NAME || "dtsummarizr-audio1";
-        const awsRegion = process.env.AWS_REGION || "us-east-1";
+        // ✅ Construct the direct S3 URL
+        const s3Url = `https://${S3_BUCKET_NAME}.s3.${REGION}.amazonaws.com/${jobName}.json`;
 
-        const s3Url = `https://${s3Bucket}.s3.${awsRegion}.amazonaws.com/${jobName}.json`;
-
-        res.json({ s3Url });  // Send back the generated S3 URL
+        res.json({ s3Url });
     } catch (error) {
         console.error("Error generating S3 URL:", error);
         res.status(500).json({ error: "Failed to generate S3 URL" });

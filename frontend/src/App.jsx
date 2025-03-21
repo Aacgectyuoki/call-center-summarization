@@ -84,42 +84,46 @@ const App = () => {
             console.warn("⚠️ No jobName found. Cannot fetch transcription.");
             return;
         }
-
+    
         console.log("🔄 Fetching transcription for job:", jobName);
-
+    
         try {
             const response = await getTranscriptionText(jobName);
             console.log("✅ Transcription API Response:", response.data);
-
+    
             if (!response.data.transcriptText || typeof response.data.transcriptText !== "string") {
                 console.error("❌ No transcription text found:", response.data);
                 return;
             }
-
+    
+            // ✅ Ensure state is updated before summarization
             setTranscription(response.data.transcriptText);
             console.log("✅ Transcription stored in state:", response.data.transcriptText);
-
+            return response.data.transcriptText; // ✅ Return transcription text for further use
+    
         } catch (error) {
             console.error("❌ Error fetching transcription:", error);
         }
-    };
+    };    
 
     // ✅ Summarize transcription
     const handleSummarize = async () => {
         console.log("Current transcription before summarization:", transcription);
     
-        if (!transcription || transcription.trim() === "") {
+        let transcriptToUse = transcription;
+    
+        if (!transcriptToUse || transcriptToUse.trim() === "") {
             console.warn("⚠️ No transcription found. Fetching first...");
-            await handleFetchTranscription(); // Fetch transcription if missing
+            transcriptToUse = await handleFetchTranscription(); // ✅ Wait for the transcript
+    
+            // ✅ Double-check if we got valid text
+            if (!transcriptToUse || transcriptToUse.trim() === "") {
+                console.error("❌ Transcription is still empty. Cannot summarize.");
+                return;
+            }
         }
     
-        // ✅ Wait for transcription to update
-        if (!transcription || transcription.trim() === "") {
-            console.error("❌ Transcription is still empty. Cannot summarize.");
-            return;
-        }
-    
-        console.log("🔄 Summarizing transcription:", transcription);
+        console.log("🔄 Summarizing transcription:", transcriptToUse);
     
         try {
             const response = await summarizeText(
@@ -131,10 +135,10 @@ const App = () => {
     
             console.log("✅ Summary Response:", response.data);
     
-            // ✅ Fix: Extract and store summary correctly
-            if (response.data.summary?.text) {
-                setSummary(response.data.summary.text);
-                console.log("✅ Summary stored in state:", response.data.summary.text);
+            // ✅ Fix: Extract summary correctly from response
+            if (response.data.summary?.kwargs?.content) {
+                setSummary(response.data.summary.kwargs.content);
+                console.log("✅ Summary stored in state:", response.data.summary.kwargs.content);
             } else {
                 console.error("❌ Summary data is missing:", response);
             }
@@ -142,7 +146,7 @@ const App = () => {
         } catch (error) {
             console.error("❌ Error fetching summary:", error);
         }
-    };
+    };       
     
     
 

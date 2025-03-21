@@ -1,92 +1,111 @@
-import React, { useState } from "react";
+import React, { Component } from "react";
 import { uploadFile, checkTranscriptionStatus, summarizeText, getTranscriptionText } from "./api";
 
-const App = () => {
-    const [selectedType, setSelectedType] = useState(null);
-    const [file, setFile] = useState(null);
-    const [error, setError] = useState("");
-    const [jobName, setJobName] = useState("");
-    const [status, setStatus] = useState("");
-    const [summary, setSummary] = useState("");
-    const [transcription, setTranscription] = useState("");
-    const [summaryOptions, setSummaryOptions] = useState({ length: "regular", complexity: "regular", format: "bullet-pointed" });
+class App extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            selectedType: null,
+            file: null,
+            error: "",
+            jobName: "",
+            status: "",
+            summary: "",
+            transcription: "",
+            summaryOptions: { length: "regular", complexity: "regular", format: "bullet-pointed" },
+            forceRender: false // Force re-render if needed
+        };
+    }
 
     // ✅ Handle file selection
-    const handleFileChange = (e) => {
+    handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
         if (!selectedFile) return;
 
-        // Validate file type
         if (
-            (selectedType === "audio" && !selectedFile.name.endsWith(".mp3")) ||
-            (selectedType === "video" && !selectedFile.name.endsWith(".mp4"))
+            (this.state.selectedType === "audio" && !selectedFile.name.endsWith(".mp3")) ||
+            (this.state.selectedType === "video" && !selectedFile.name.endsWith(".mp4"))
         ) {
-            setError("❌ Please select a valid file type.");
+            this.setState({ error: "❌ Please select a valid file type." });
             return;
         }
 
-        setError("");
-        setFile(selectedFile);
+        console.log("📂 File selected:", selectedFile.name);
+        this.setState({ error: "", file: selectedFile });
     };
 
     // ✅ Upload & Transcribe
-    const handleUpload = async () => {
+    handleUpload = async () => {
+        const { file } = this.state;
         if (!file) {
-            setError("❌ Please select a file before uploading.");
+            this.setState({ error: "❌ Please select a file before uploading." });
             return;
         }
 
+        console.log("📤 Uploading file...");
         try {
             const response = await uploadFile(file);
-            console.log("✅ Upload Response:", response.data); // Debugging
+            console.log("✅ Upload Response:", response.data);
 
             if (response.data && response.data.transcriptionJobId) {
-                setJobName(response.data.transcriptionJobId);
-                setStatus("Processing...");
+                this.setState({ jobName: response.data.transcriptionJobId, status: "Processing..." });
+                console.log("🔄 Job started:", response.data.transcriptionJobId);
             } else {
-                console.error("❌ Upload response does not contain transcriptionJobId:", response.data);
-                setError("Failed to upload file. No transcription ID received.");
+                console.error("❌ Upload response missing transcriptionJobId:", response.data);
+                this.setState({ error: "Failed to upload file. No transcription ID received." });
             }
         } catch (err) {
             console.error("❌ File Upload Error:", err);
-            setError("Failed to upload file.");
+            this.setState({ error: "Failed to upload file." });
         }
     };
 
-    // ✅ Check transcription status
-    const handleCheckStatus = async () => {
-        if (!jobName) return;
+    // // ✅ Check transcription status
+    // handleCheckStatus = async () => {
+    //     const { jobName } = this.state;
+    //     if (!jobName) {
+    //         console.warn("⚠️ No jobName found.");
+    //         return;
+    //     }
 
-        try {
-            const response = await checkTranscriptionStatus(jobName);
-            console.log("📡 Transcription Status Response:", response.data);
+    //     console.log("📡 Checking transcription status for:", jobName);
+    //     try {
+    //         const response = await checkTranscriptionStatus(jobName);
+    //         console.log("📡 Transcription Status Response:", response.data);
 
-            if (response.data && response.data.status) {
-                setStatus(response.data.status);
+    //         if (response.data && response.data.status) {
+    //             this.setState({ status: response.data.status }, () => {
+    //                 console.log("✅ Status updated:", this.state.status);
+                    
+    //                 if (response.data.status === "COMPLETED") {
+    //                     console.log("🎉 Transcription is completed.");
+    //                 } else {
+    //                     console.warn("⏳ Transcription is still processing...");
+    //                 }
 
-                if (response.data.status === "COMPLETED") {
-                    console.log("✅ Transcription is completed.");
-                } else {
-                    console.warn("⚠️ Transcription is still processing...");
-                }
-            } else {
-                console.error("❌ Invalid status response:", response.data);
-                setError("Failed to fetch transcription status.");
-            }
-        } catch (err) {
-            console.error("⚠️ Status Check Error:", err);
-        }
-    };
+    //                 // ✅ Force re-render to update UI
+    //                 this.setState((prevState) => ({
+    //                     forceRender: !prevState.forceRender
+    //                 }));
+    //             });
+    //         } else {
+    //             console.error("❌ Invalid status response:", response.data);
+    //             this.setState({ error: "Failed to fetch transcription status." });
+    //         }
+    //     } catch (err) {
+    //         console.error("⚠️ Status Check Error:", err);
+    //     }
+    // };
 
     // ✅ Fetch transcription
-    const handleFetchTranscription = async () => {
+    handleFetchTranscription = async () => {
+        const { jobName } = this.state;
         if (!jobName) {
             console.warn("⚠️ No jobName found. Cannot fetch transcription.");
             return;
         }
     
         console.log("🔄 Fetching transcription for job:", jobName);
-    
         try {
             const response = await getTranscriptionText(jobName);
             console.log("✅ Transcription API Response:", response.data);
@@ -96,130 +115,170 @@ const App = () => {
                 return;
             }
     
-            // ✅ Ensure state is updated before summarization
-            setTranscription(response.data.transcriptText);
-            console.log("✅ Transcription stored in state:", response.data.transcriptText);
-            return response.data.transcriptText; // ✅ Return transcription text for further use
+            // ✅ Ensure state updates before summarization
+            this.setState({ transcription: response.data.transcriptText }, () => {
+                console.log("✅ Transcription stored:", this.state.transcription);
+            });
     
         } catch (error) {
             console.error("❌ Error fetching transcription:", error);
         }
-    };    
+    };
+    
 
     // ✅ Summarize transcription
-    const handleSummarize = async () => {
-        console.log("Current transcription before summarization:", transcription);
+    handleSummarize = async () => {
+        console.log("🔍 Checking transcription before summarization:", this.state.transcription);
     
-        let transcriptToUse = transcription;
-    
-        if (!transcriptToUse || transcriptToUse.trim() === "") {
+        // ✅ Ensure transcription exists by fetching it first if it's missing
+        if (!this.state.transcription || this.state.transcription.trim() === "") {
             console.warn("⚠️ No transcription found. Fetching first...");
-            transcriptToUse = await handleFetchTranscription(); // ✅ Wait for the transcript
+            await this.handleFetchTranscription();
     
-            // ✅ Double-check if we got valid text
-            if (!transcriptToUse || transcriptToUse.trim() === "") {
+            // ✅ Wait a bit to ensure state updates
+            await new Promise(resolve => setTimeout(resolve, 1000));
+    
+            if (!this.state.transcription || this.state.transcription.trim() === "") {
                 console.error("❌ Transcription is still empty. Cannot summarize.");
                 return;
             }
         }
     
-        console.log("🔄 Summarizing transcription:", transcriptToUse);
-    
+        console.log("🔄 Summarizing transcription...");
         try {
             const response = await summarizeText(
-                jobName,
-                summaryOptions.length,
-                summaryOptions.complexity,
-                summaryOptions.format
+                this.state.jobName,
+                this.state.summaryOptions.length,
+                this.state.summaryOptions.complexity,
+                this.state.summaryOptions.format
             );
     
-            console.log("✅ Summary Response:", response.data);
+            console.log("✅ Full Summary Response:", response.data);
     
-            // ✅ Fix: Extract summary correctly from response
             if (response.data.summary?.kwargs?.content) {
-                setSummary(response.data.summary.kwargs.content);
-                console.log("✅ Summary stored in state:", response.data.summary.kwargs.content);
+                console.log("✅ Extracted Summary:", response.data.summary.kwargs.content);
+                this.setState({ summary: response.data.summary.kwargs.content });
             } else {
                 console.error("❌ Summary data is missing:", response);
             }
-    
         } catch (error) {
             console.error("❌ Error fetching summary:", error);
         }
-    };       
+    };
     
-    
+    // ✅ Auto-fetch transcription once status is "COMPLETED"
+    handleCheckStatus = async () => {
+        const { jobName } = this.state;
+        if (!jobName) {
+            console.warn("⚠️ No jobName found.");
+            return;
+        }
 
-    return (
-        <div className="flex flex-col items-center min-h-screen bg-gray-100 p-6">
-            <h1 className="text-3xl font-bold text-gray-800 mb-6">DT Summarizer</h1>
-            <p className="text-gray-500 mb-6">Transform your content into concise, meaningful summaries</p>
+        console.log("📡 Checking transcription status for:", jobName);
+        try {
+            const response = await checkTranscriptionStatus(jobName);
+            console.log("📡 Transcription Status Response:", response.data);
 
-            {/* Step 1: Select Content Type */}
-            <div className="w-full max-w-lg bg-white p-6 shadow-lg rounded-lg">
-                <h2 className="text-lg font-semibold mb-4">1. Select Content Type</h2>
-                <div className="flex gap-4">
-                    <button
-                        className={`p-4 border rounded-lg w-full ${selectedType === "audio" ? "bg-blue-600 text-white" : "bg-gray-100"}`}
-                        onClick={() => setSelectedType("audio")}
-                    >
-                        Audio File (MP3)
-                    </button>
-                    <button
-                        className={`p-4 border rounded-lg w-full ${selectedType === "video" ? "bg-blue-600 text-white" : "bg-gray-100"}`}
-                        onClick={() => setSelectedType("video")}
-                    >
-                        Video File (MP4)
-                    </button>
+            if (response.data && response.data.status) {
+                this.setState({ status: response.data.status }, async () => {
+                    console.log("✅ Status updated:", this.state.status);
+
+                    if (response.data.status === "COMPLETED") {
+                        console.log("🎉 Transcription is completed. Fetching now...");
+                        
+                        // ✅ Auto-fetch transcription
+                        await this.handleFetchTranscription();
+
+                        // ✅ Force re-render to enable Summarize button
+                        this.setState((prevState) => ({
+                            forceRender: !prevState.forceRender
+                        }));
+                    } else {
+                        console.warn("⏳ Transcription is still processing...");
+                    }
+                });
+            } else {
+                console.error("❌ Invalid status response:", response.data);
+                this.setState({ error: "Failed to fetch transcription status." });
+            }
+        } catch (err) {
+            console.error("⚠️ Status Check Error:", err);
+        }
+    };
+
+    // ✅ Ensure Summarize button is always enabled after fetching transcription
+    render() {
+        return (
+            <div className="flex flex-col items-center min-h-screen bg-gray-100 p-6">
+                <h1 className="text-3xl font-bold text-gray-800 mb-6">DT Summarizer</h1>
+                <p className="text-gray-500 mb-6">Transform your content into concise, meaningful summaries</p>
+
+                {/* Step 1: Select Content Type */}
+                <div className="w-full max-w-lg bg-white p-6 shadow-lg rounded-lg">
+                    <h2 className="text-lg font-semibold mb-4">1. Select Content Type</h2>
+                    <div className="flex gap-4">
+                        <button className={`p-4 border rounded-lg w-full ${this.state.selectedType === "audio" ? "bg-blue-600 text-white" : "bg-gray-100"}`} 
+                            onClick={() => this.setState({ selectedType: "audio" })}>
+                            Audio File (MP3)
+                        </button>
+                        <button className={`p-4 border rounded-lg w-full ${this.state.selectedType === "video" ? "bg-blue-600 text-white" : "bg-gray-100"}`} 
+                            onClick={() => this.setState({ selectedType: "video" })}>
+                            Video File (MP4)
+                        </button>
+                    </div>
                 </div>
+
+                {/* Step 2: Upload File */}
+                {this.state.selectedType && (
+                    <div className="w-full max-w-lg bg-white p-6 shadow-lg rounded-lg mt-6">
+                        <h2 className="text-lg font-semibold mb-4">2. Upload Content</h2>
+                        <input type="file" onChange={this.handleFileChange} className="block w-full p-2 border rounded-lg" />
+                        {this.state.error && <p className="text-red-500 mt-2">{this.state.error}</p>}
+                        {this.state.file && <p className="text-gray-700 mt-2">Selected: {this.state.file.name}</p>}
+
+                        <button 
+                            className="mt-4 px-6 py-3 bg-blue-600 text-white rounded w-full transition"
+                            disabled={!this.state.file}
+                            onClick={this.handleUpload}
+                        >
+                            Upload & Transcribe
+                        </button>
+                    </div>
+                )}
+
+                {/* Step 3: Check Status & Summarize */}
+                {this.state.jobName && (
+                    <div className="w-full max-w-lg bg-white p-6 shadow-lg rounded-lg mt-6">
+                        <h2 className="text-lg font-semibold">
+                            Job Status: {this.state.status === "COMPLETED" ? "✅ Completed" : "⏳ Processing..."}
+                        </h2>
+                        <button className="mt-4 px-6 py-3 bg-green-600 text-white rounded w-full transition" onClick={this.handleCheckStatus}>
+                            Check Status
+                        </button>
+
+                        {/* ✅ Summarize Button Always Available After Completion */}
+                        {this.state.status === "COMPLETED" && (
+                            <button 
+                                className={`mt-4 px-6 py-3 ${this.state.transcription ? "bg-purple-600" : "bg-gray-400"} text-white rounded w-full transition`} 
+                                onClick={this.handleSummarize}
+                                disabled={!this.state.transcription} // Button enabled only when transcription exists
+                            >
+                                {this.state.summary ? "Re-Summarize" : "Summarize"}
+                            </button>
+                        )}
+                    </div>
+                )}
+
+                {/* Step 4: Display Summary */}
+                {this.state.summary && (
+                    <div className="mt-4 p-4 bg-gray-200 shadow-md rounded-lg w-full max-w-xl">
+                        <h2 className="font-bold text-lg">Summary:</h2>
+                        <p className="text-gray-700">{this.state.summary}</p>
+                    </div>
+                )}
             </div>
-
-            {/* Step 2: Upload File */}
-            {selectedType && (
-                <div className="w-full max-w-lg bg-white p-6 shadow-lg rounded-lg mt-6">
-                    <h2 className="text-lg font-semibold mb-4">2. Upload Content</h2>
-                    <input type="file" onChange={handleFileChange} className="block w-full p-2 border rounded-lg" />
-                    {error && <p className="text-red-500 mt-2">{error}</p>}
-                    {file && <p className="text-gray-700 mt-2">Selected: {file.name}</p>}
-
-                    <button 
-                        className="mt-4 px-6 py-3 bg-blue-600 text-white rounded w-full transition"
-                        disabled={!file}
-                        onClick={handleUpload}
-                    >
-                        Upload & Transcribe
-                    </button>
-                </div>
-            )}
-
-            {/* Step 3: Check Transcription Status */}
-            {jobName && (
-                <div className="w-full max-w-lg bg-white p-6 shadow-lg rounded-lg mt-6">
-                    <h2 className="text-lg font-semibold">
-                        Job Status: {status === "COMPLETED" ? "✅ Completed" : "⏳ Processing..."}
-                    </h2>
-                    <button className="mt-4 px-6 py-3 bg-green-600 text-white rounded w-full transition" onClick={handleCheckStatus}>
-                        Check Status
-                    </button>
-                </div>
-            )}
-
-            {/* Step 4: Summarize Transcription */}
-            {status === "COMPLETED" && (
-                <button className="mt-4 px-6 py-3 bg-purple-600 text-white rounded" onClick={handleSummarize}>
-                    Summarize
-                </button>
-            )}
-
-            {/* Step 5: Display Summary */}
-            {summary && (
-                <div className="mt-4 p-4 bg-gray-200 shadow-md rounded-lg w-full max-w-xl">
-                    <h2 className="font-bold text-lg">Summary:</h2>
-                    <p className="text-gray-700">{summary || "No summary available"}</p>
-                </div>
-            )}
-        </div>
-    );
-};
+        );
+    }
+}
 
 export default App;

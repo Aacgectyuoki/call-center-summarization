@@ -1,13 +1,32 @@
-body {
+.app-container {
   font-family: 'Inter', sans-serif;
   background-color: #f3f4f6;
   color: #1f2937;
+  text-align: center;
+  padding: 20px;
 }
 
-button {
-  transition: all 0.3s ease-in-out;
+.card, .summary-card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  margin: 20px auto;
+  width: 50%;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-button:hover {
-  opacity: 0.9;
+.primary-btn, .summarize-btn, .secondary-btn, .status-btn, .cancel-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  margin: 5px;
+  cursor: pointer;
+  transition: all 0.3s;
 }
+
+.primary-btn { background-color: #007bff; color: white; }
+.summarize-btn { background-color: #6a0dad; color: white; }
+.secondary-btn { background-color: #ffcc00; color: black; }
+.cancel-btn { background-color: #ff4d4d; color: white; }
+
+.loading { background-color: #888 !important; }

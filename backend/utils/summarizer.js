@@ -23,12 +23,12 @@ const summaryPrompt = new PromptTemplate({
 
 const bulletPrompt = new PromptTemplate({
     inputVariables: ["summary"],
-    template: "Take the following summary and organize it into structured bullet points with **main points** and **sub-bullets**:\n\n{summary}"
+    template: "Summarize the following transcript in clear and concise bullet points, keeping only key concepts and avoiding unnecessary engagement:\n\n{transcript}"
 });
 
 const humanizePrompt = new PromptTemplate({
     inputVariables: ["structuredSummary"],
-    template: "Rewrite this structured summary to be more engaging, natural, and conversational:\n\n{structuredSummary}"
+    template: "Rewrite this structured summary to be professional, clear, and easy to read without unnecessary engagement:\n\n{structuredSummary}"
 });
 
 /**

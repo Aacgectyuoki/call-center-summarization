@@ -1,12 +1,12 @@
 import React, { Component } from "react";
 import { uploadFile, checkTranscriptionStatus, summarizeText, getTranscriptionText } from "./api";
-import "./App.css"; // Import CSS for better styling
+import "./App.css"; 
 
 class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            selectedType: "audio",  // 👈 Set default to "audio" or "video"
+            selectedType: null, 
             file: null,
             error: "",
             jobName: "",
@@ -18,25 +18,35 @@ class App extends Component {
             summaryOptions: { length: "concise", complexity: "simplified", format: "bullet-pointed" },
             isCanceled: false
         };
-    }    
+    }
 
+    /** Handle file selection */
     handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
         if (!selectedFile) return;
+
+        if (
+            (this.state.selectedType === "audio" && !selectedFile.name.endsWith(".mp3")) ||
+            (this.state.selectedType === "video" && !selectedFile.name.endsWith(".mp4"))
+        ) {
+            this.setState({ error: "❌ Please select a valid file type." });
+            return;
+        }
+
         this.setState({ error: "", file: selectedFile });
         console.log("📂 File selected:", selectedFile.name);
     };
 
+    /** Upload File */
     handleUpload = async () => {
-        const { file } = this.state;
-        if (!file) {
+        if (!this.state.file) {
             this.setState({ error: "❌ Please select a file before uploading." });
             return;
         }
 
         console.log("📤 Uploading file...");
         try {
-            const response = await uploadFile(file);
+            const response = await uploadFile(this.state.file);
             if (response.data?.transcriptionJobId) {
                 this.setState({ jobName: response.data.transcriptionJobId, status: "Processing..." });
                 console.log("🔄 Job started:", response.data.transcriptionJobId);
@@ -46,30 +56,42 @@ class App extends Component {
         }
     };
 
+    /** Check Transcription Status */
     handleCheckStatus = async () => {
-        const { jobName } = this.state;
-        if (!jobName) return;
+        if (!this.state.jobName) {
+            console.warn("⚠️ No transcription job found.");
+            return;
+        }
 
-        console.log("📡 Checking transcription status for:", jobName);
+        console.log("📡 Checking transcription status for:", this.state.jobName);
         try {
-            const response = await checkTranscriptionStatus(jobName);
+            const response = await checkTranscriptionStatus(this.state.jobName);
             if (response.data?.status) {
-                this.setState({ status: response.data.status }, () => {
-                    console.log("✅ Status updated:", this.state.status);
-                });
+                this.setState({ status: response.data.status });
+                console.log("✅ Status updated:", response.data.status);
+
+                if (response.data.status === "COMPLETED") {
+                    await this.handleFetchTranscription();
+                }
+            } else {
+                console.warn("⚠️ No status found in response.");
             }
         } catch (err) {
-            console.error("⚠️ Status Check Error:", err);
+            console.error("❌ Status Check Error:", err);
+            this.setState({ error: "⚠️ Failed to check status. Please try again." });
         }
     };
 
+    /** Fetch Transcription */
     handleFetchTranscription = async () => {
-        const { jobName } = this.state;
-        if (!jobName) return;
+        if (!this.state.jobName) {
+            console.warn("⚠️ No transcription job available.");
+            return;
+        }
 
-        console.log("🔄 Fetching transcription for job:", jobName);
+        console.log("🔄 Fetching transcription for job:", this.state.jobName);
         try {
-            const response = await getTranscriptionText(jobName);
+            const response = await getTranscriptionText(this.state.jobName);
             if (response.data?.transcriptText) {
                 this.setState({ transcription: response.data.transcriptText });
                 console.log("✅ Transcription stored:", response.data.transcriptText);
@@ -79,6 +101,7 @@ class App extends Component {
         }
     };
 
+    /** Simulate Progress Bar */
     simulateProgress = () => {
         this.setState({ progress: 0, isCanceled: false });
         let progressInterval = setInterval(() => {
@@ -95,11 +118,13 @@ class App extends Component {
         }, 500);
     };
 
+    /** Cancel Summarization */
     handleCancelSummarization = () => {
         console.log("❌ Summarization canceled.");
-        this.setState({ isCanceled: true });
+        this.setState({ isCanceled: true, isSummarizing: false, progress: 0 });
     };
 
+    /** Summarize Transcription */
     handleSummarize = async () => {
         if (!this.state.transcription) {
             console.warn("⚠️ No transcription found. Fetching first...");
@@ -109,6 +134,7 @@ class App extends Component {
         console.log("🔄 Starting Summarization...");
         this.setState({ isSummarizing: true, progress: 0, summary: "" });
 
+        // Simulate Progress
         this.simulateProgress();
 
         try {
@@ -129,6 +155,7 @@ class App extends Component {
         }
     };
 
+    /** Reset for New Summarization */
     handleNewSummarization = () => {
         this.setState({
             selectedType: null,
@@ -145,30 +172,48 @@ class App extends Component {
     };
 
     render() {
-        console.log("Rendering App - Current State:", this.state);
+        console.log("📌 Current App State:", this.state); 
+
         return (
             <div className="app-container">
                 <h1>DT Summarizer</h1>
                 <p>Transform your content into concise, meaningful summaries</p>
 
+                {/* Select Content Type */}
+                <div className="card">
+                    <h2>Select Content Type</h2>
+                    <div className="btn-group">
+                        <button 
+                            className={`option-btn ${this.state.selectedType === "audio" ? "selected" : ""}`} 
+                            onClick={() => this.setState({ selectedType: "audio", file: null })}
+                        >
+                            🎵 Audio File (MP3)
+                        </button>
+                        <button 
+                            className={`option-btn ${this.state.selectedType === "video" ? "selected" : ""}`} 
+                            onClick={() => this.setState({ selectedType: "video", file: null })}
+                        >
+                            🎥 Video File (MP4)
+                        </button>
+                    </div>
+                </div>
+
                 {/* Upload File */}
                 {this.state.selectedType && (
                     <div className="card">
-                        {!this.state.selectedType && (
-                            <div className="text-center text-gray-500 mt-6">
-                                <p>⚠️ Please select a content type to continue.</p>
-                            </div>
-                        )}
                         <h2>Upload Content</h2>
                         <input type="file" onChange={this.handleFileChange} />
-                        <br></br>
-                        <button className="primary-btn" onClick={this.handleUpload}>
+                        <button 
+                            className="primary-btn" 
+                            onClick={this.handleUpload} 
+                            disabled={!this.state.file || !this.state.selectedType}
+                        >
                             Upload & Transcribe
                         </button>
                     </div>
                 )}
 
-                {/* Check Status & Summarize */}
+                {/* Job Status & Summarize */}
                 {this.state.jobName && (
                     <div className="card">
                         <h2>Job Status: ✅ {this.state.status}</h2>
@@ -178,24 +223,23 @@ class App extends Component {
 
                         {this.state.status === "COMPLETED" && (
                             <>
-                                <button
-                                    className={`summarize-btn ${this.state.isSummarizing ? "loading" : ""}`}
-                                    onClick={this.handleSummarize}
+                                <button 
+                                    className={`summarize-btn ${this.state.isSummarizing ? "loading" : ""}`} 
+                                    onClick={this.handleSummarize} 
                                     disabled={this.state.isSummarizing}
                                 >
-                                    {this.state.isSummarizing ? `Summarizing... (${this.state.progress}%)` : this.state.summary ? "Re-Summarize" : "Summarize"}
+                                    Summarize
                                 </button>
-                                {this.state.isSummarizing && <button className="cancel-btn" onClick={this.handleCancelSummarization}>Cancel</button>}
                             </>
                         )}
                     </div>
                 )}
 
-                {/* Summary Display */}
+                {/* Display Summary */}
                 {this.state.summary && (
                     <div className="summary-card">
                         <h2>📌 Summary:</h2>
-                        <p dangerouslySetInnerHTML={{ __html: this.state.summary }} />
+                        <ul dangerouslySetInnerHTML={{ __html: this.state.summary }} />
                         <button className="secondary-btn" onClick={this.handleNewSummarization}>
                             Summarize Something Else
                         </button>

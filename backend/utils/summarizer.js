@@ -1,87 +1,71 @@
 const { ChatOpenAI } = require("@langchain/openai");
 const { PromptTemplate } = require("@langchain/core/prompts");
-const { StructuredTool } = require("@langchain/core/tools");
 const z = require("zod");
 
-
 /**
- * ✅ Initialize OpenAI Model
+ * ✅ Initialize OpenAI Model with Faster Execution
  */
 const model = new ChatOpenAI({
-    modelName: "gpt-4",
-    temperature: 0.7,
+    modelName: "gpt-4-turbo",
+    temperature: 0.3, // Keeps responses structured & clear
     openAIApiKey: process.env.OPENAI_API_KEY
 });
 
 /**
- * ✅ Define Prompts for Summarization
+ * ✅ Define AI Prompts for Bullet-Point Summaries
  */
 const summaryPrompt = new PromptTemplate({
     inputVariables: ["transcript"],
-    template: "Summarize the following transcript in clear and concise bullet points:\n\n{transcript}"
-});
+    template: `
+    Summarize the following transcript in a **structured bullet-point format**:
+    - Use **bolded main points** for key topics.
+    - Use **sub-bullets (◦)** for supporting details.
+    - Extract **technical terms** and define them simply.
 
-const bulletPrompt = new PromptTemplate({
-    inputVariables: ["summary"],
-    template: "Summarize the following transcript in clear and concise bullet points, keeping only key concepts and avoiding unnecessary engagement:\n\n{transcript}"
-});
-
-const humanizePrompt = new PromptTemplate({
-    inputVariables: ["structuredSummary"],
-    template: "Rewrite this structured summary to be professional, clear, and easy to read without unnecessary engagement:\n\n{structuredSummary}"
+    **Output Format**:
+    1. **Bullet-Point Summary**
+    2. **Technical Terms and Their Definitions**
+    
+    Transcript:
+    {transcript}
+    `
 });
 
 /**
- * ✅ AI Processing Tools
- */
-class BulletStructuringTool extends StructuredTool {
-    name = "Bullet Structuring";
-    description = "Formats a summary into structured bullet points.";
-    schema = z.object({ summary: z.string() });
-
-    async _call({ summary }) {
-        const formattedSummary = await bulletPrompt.format({ summary }); // Await the formatted summary
-        return await model.invoke([{ role: "user", content: formattedSummary }]); // Proper format
-    }
-}
-
-class HumanizerTool extends StructuredTool {
-    name = "Humanizer";
-    description = "Rewrites the summary in a more natural and engaging way.";
-    schema = z.object({ structuredSummary: z.string() });
-
-    async _call({ structuredSummary }) {
-        const formattedSummary = await humanizePrompt.format({ structuredSummary }); // Await the formatted summary
-        return await model.invoke([{ role: "user", content: formattedSummary }]); // Proper format
-    }
-}
-
-/**
- * 🟢 Main Summarization Function
+ * 🟢 Optimized AI Summarization Function
  */
 async function generateStructuredSummary(transcript) {
     try {
-        console.log("📡 Received transcript for summarization...");
+        console.log("📡 Processing transcript with OpenAI...");
 
         if (!transcript || typeof transcript !== "string" || transcript.trim() === "") {
             throw new Error("Invalid transcript input");
         }
 
-        console.log("🔹 Step 1: Generating Initial Summary...");
-        const formattedSummaryPrompt = await summaryPrompt.format({ transcript }); // Await the formatted summary prompt
-        const summary = await model.invoke([{ role: "user", content: formattedSummaryPrompt }]);
+        console.log("🔹 Generating Structured Bullet-Point Summary...");
+        
+        const formattedSummaryPrompt = await summaryPrompt.format({ transcript });
+        const response = await model.invoke([{ role: "user", content: formattedSummaryPrompt }]);
 
-        console.log("🔹 Step 2: Structuring Bullet Points...");
-        const formattedBulletPrompt = await bulletPrompt.format({ summary }); // Await the formatted bullet prompt
-        const structuredSummary = await model.invoke([{ role: "user", content: formattedBulletPrompt }]);
+        // Ensure the response contains text
+        if (!response || !response.content) {
+            console.error("❌ OpenAI API did not return valid content:", response);
+            throw new Error("Invalid OpenAI response");
+        }
 
-        console.log("🔹 Step 3: Making it More Engaging...");
-        const formattedHumanizePrompt = await humanizePrompt.format({ structuredSummary }); // Await the formatted humanize prompt
-        const finalSummary = await model.invoke([{ role: "user", content: formattedHumanizePrompt }]);
+        const summaryText = response.content;
 
-        return finalSummary;
+        return { summary: summaryText };
+        // console.log("📡 AI Model Raw Response:", summary);
+
+        // if (!summary || typeof summary !== "string") {
+        //     console.error("❌ AI model returned invalid response:", summary);
+        //     throw new Error("AI model response is invalid");
+        // }
+
+        // return summary;
     } catch (error) {
-        console.error("❌ AI Summarization Error:", error);
+        console.error("❌ AI Summarization Error:", error.message);
         throw new Error("Failed to generate structured summary");
     }
 }

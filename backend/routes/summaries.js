@@ -1,5 +1,7 @@
 const express = require("express");
 const Summary = require("../models/Summary"); // Ensure you have a Summary model
+const { generateStructuredSummary } = require("../utils/summarizer");
+const { getTranscriptByJobName } = require("../utils/transcriptionUtils");
 
 const router = express.Router();
 
@@ -23,18 +25,37 @@ router.get("/", async (req, res) => {
  */
 router.post("/", async (req, res) => {
     try {
-        const { jobName, transcript, summary } = req.body;
-        if (!jobName || !summary) {
-            return res.status(400).json({ message: "Job name and summary are required" });
+        const { jobName, length, complexity, format } = req.body;
+
+        if (!jobName || !length || !complexity || !format) {
+            return res.status(400).json({ message: "Missing required parameters" });
         }
 
-        const newSummary = new Summary({ jobName, transcript, summary });
-        await newSummary.save();
+        console.log("🟢 Summarizing transcript for job:", jobName);
 
-        res.status(201).json({ message: "Summary saved successfully", summary: newSummary });
+        // Retrieve transcription text (mock or real)
+        const transcript = await getTranscriptByJobName(jobName);
+        if (!transcript) {
+            return res.status(404).json({ message: "Transcript not found" });
+        }
+
+        const summary = await generateStructuredSummary(transcript);
+
+        // Ensure summary is a string before sending it to frontend
+        const extractedSummary = summary?.text || summary;
+        if (typeof extractedSummary !== "string") {
+            console.error("❌ Backend returned invalid summary format:", extractedSummary);
+            return res.status(500).json({ message: "Invalid summary format from AI" });
+        }
+
+        res.status(200).json({
+            summary: summary.text, // Ensure correct format
+            technicalTerms: summary.technicalTerms || []
+        });        
+
     } catch (error) {
-        console.error("❌ Error saving summary:", error);
-        res.status(500).json({ message: "Failed to save summary" });
+        console.error("❌ Summarization Error:", error);
+        res.status(500).json({ message: "Summarization failed" });
     }
 });
 

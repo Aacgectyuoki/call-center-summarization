@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import ReactMarkdown from "react-markdown";
 import { uploadFile, checkTranscriptionStatus, summarizeText, getTranscriptionText } from "./api";
 import "./App.css"; 
 
@@ -11,7 +12,8 @@ class App extends Component {
             error: "",
             jobName: "",
             status: "",
-            summary: "",
+            summaryContent: [],
+            technicalDefinitions: [],
             transcription: "",
             isSummarizing: false,
             progress: 0,
@@ -130,30 +132,55 @@ class App extends Component {
             console.warn("⚠️ No transcription found. Fetching first...");
             await this.handleFetchTranscription();
         }
-
+    
         console.log("🔄 Starting Summarization...");
-        this.setState({ isSummarizing: true, progress: 0, summary: "" });
-
-        // Simulate Progress
+        this.setState({ isSummarizing: true, progress: 0, summaryContent: [], technicalDefinitions: [] });
+    
+        // Simulate Progress Bar
         this.simulateProgress();
-
+    
         try {
-            const response = await summarizeText(
-                this.state.jobName,
-                "concise",
-                "simplified",
-                "bullet-pointed"
-            );
-
-            if (response.data.summary?.kwargs?.content) {
-                this.setState({ summary: response.data.summary.kwargs.content, isSummarizing: false, progress: 100 });
-                console.log("✅ Extracted Concise Summary:", response.data.summary.kwargs.content);
+            console.log("📡 Sending transcript to backend...");
+            const { jobName, summaryOptions } = this.state;
+    
+            if (!jobName) {
+                throw new Error("Invalid jobName - Cannot summarize");
             }
+    
+            const response = await summarizeText(jobName, summaryOptions.length, summaryOptions.complexity, summaryOptions.format);
+    
+            console.log("📡 API Response:", response.data); // Debugging step
+    
+            // Check if the API response contains the expected data
+            if (!response || !response.data || !response.data.summary) {
+                console.error("❌ No response data from backend:", response);
+                throw new Error("No valid response from backend");
+            }
+    
+            // Extract `text` from `summary` object
+            const summaryText = response.data.summary.text;  // FIXED LINE
+            const technicalTerms = response.data.technicalTerms || [];
+    
+            if (!summaryText) {
+                console.error("❌ Summary is missing in response:", response.data);
+                throw new Error("Invalid summary format from backend");
+            }
+    
+            console.log("✅ Extracting summary from response...");
+            this.setState({
+                summaryContent: summaryText.split("\n").map(line => line.trim()),  // FIXED LINE
+                technicalDefinitions: technicalTerms,
+                isSummarizing: false,
+                progress: 100
+            });
+    
+            console.log("✅ Summary & Technical Terms Generated!");
         } catch (error) {
-            console.error("❌ Error fetching summary:", error);
-            this.setState({ isSummarizing: false, progress: 0 });
+            console.error("❌ Summarization Error:", error);
+            this.setState({ isSummarizing: false, progress: 0, error: "⚠️ Failed to summarize. Please try again." });
         }
     };
+    
 
     /** Reset for New Summarization */
     handleNewSummarization = () => {
@@ -236,15 +263,44 @@ class App extends Component {
                 )}
 
                 {/* Display Summary */}
-                {this.state.summary && (
-                    <div className="summary-card">
-                        <h2>📌 Summary:</h2>
-                        <ul dangerouslySetInnerHTML={{ __html: this.state.summary }} />
-                        <button className="secondary-btn" onClick={this.handleNewSummarization}>
-                            Summarize Something Else
-                        </button>
+                <div className="summary-card">
+                    <h2>📌 Summary:</h2>
+                    <div className="formatted-summary">
+                        {this.state.summaryContent.length > 0 ? (
+                            <ul>
+                                {this.state.summaryContent.map((line, index) => {
+                                    if (line.startsWith("**") && line.endsWith("**")) {
+                                        return <li key={index}><strong>{line.replace(/\*\*/g, "")}</strong></li>;
+                                    } else if (line.startsWith("-")) {
+                                        return <li key={index}>{line.replace("- ", "")}</li>;
+                                    } else if (line.startsWith("◦")) {
+                                        return <li key={index} style={{ marginLeft: "20px" }}>{line.replace("◦ ", "")}</li>;
+                                    } else {
+                                        return <p key={index}>{line}</p>;
+                                    }
+                                })}
+                            </ul>
+                        ) : <p>No summary available.</p>}
                     </div>
-                )}
+
+                    {/* Display Technical Terms */}
+                    {this.state.technicalDefinitions.length > 0 && (
+                        <div className="technical-terms">
+                            <h2>🔹 Technical Terms Defined</h2>
+                            <ul>
+                                {this.state.technicalDefinitions.map((term, index) => (
+                                    <li key={index}>
+                                        <strong>{term.name}:</strong> {term.definition}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
+                    <button className="secondary-btn" onClick={this.handleNewSummarization}>
+                        Summarize Something Else
+                    </button>
+                </div>
             </div>
         );
     }

@@ -30,6 +30,7 @@ build/
 # Ignore test coverage
 coverage/
 .env
+<<<<<<< HEAD
 
 <<<<<<< HEAD
 # Ignore virtual environment
@@ -52,3 +53,5 @@ data/summary.txt
 .venv/
 venv/
 >>>>>>> main
+=======
+>>>>>>> 7f6b113e (Removed .env from tracking)

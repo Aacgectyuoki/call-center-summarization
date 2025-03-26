@@ -1,0 +1,131 @@
+/* Main Container */
+.app-container {
+    font-family: 'Inter', sans-serif;
+    background-color: #f3f4f6;
+    color: #1f2937;
+    /* text-align: center; */
+    padding: 30px;
+  }
+  
+  /* Card Layout */
+  .card, .summary-card, .technical-terms {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    margin: 20px auto;
+    width: 55%;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .card:hover, .summary-card:hover, .technical-terms:hover {
+    transform: scale(1.02);
+  }
+  
+  /* Buttons */
+  .primary-btn, .summarize-btn, .secondary-btn, .status-btn, .cancel-btn {
+    padding: 12px 22px;
+    border-radius: 10px;
+    border: none;
+    margin: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .primary-btn { background: linear-gradient(135deg, #007bff, #0056b3); color: white; }
+  .summarize-btn { background: linear-gradient(135deg, #6a0dad, #4b0082); color: white; }
+  .secondary-btn { background: linear-gradient(135deg, #ffcc00, #ff9900); color: black; }
+  .cancel-btn { background: linear-gradient(135deg, #ff4d4d, #cc0000); color: white; }
+  
+  .primary-btn:hover, .summarize-btn:hover, .secondary-btn:hover, .cancel-btn:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+  }
+  
+  .loading { background-color: #888 !important; }
+  
+  /* Summary Formatting */
+  .summary-card h2, .technical-terms h2 {
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin-bottom: 12px;
+    text-align: center;
+    color: #333;
+  }
+  
+  /* Bullet Points */
+  .formatted-summary ul {
+    padding-left: 20px;
+    list-style-type: disc; /* Restore normal bullet points */
+  }
+  
+  .formatted-summary ul ul {
+    list-style-type: circle; /* White bullets for sub-lists */
+    padding-left: 30px; /* Indentation for sublists */
+  }
+  
+  .formatted-summary li {
+    font-size: 1.05rem;
+    margin-bottom: 8px;
+    line-height: 1.5;
+  }
+  
+  .formatted-summary li::marker {
+    color: #333; /* Black bullet points for main items */
+    font-weight: bold;
+  }
+  
+  .formatted-summary li ul li::marker {
+    color: #777; /* Lighter color for sub-items */
+  }
+  
+  
+  
+  /* Technical Terms Styling */
+  .technical-terms {
+    background: #f9fafb;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+    text-align: left;
+    width: 55%;
+    margin: auto;
+  }
+  
+  .technical-terms ul {
+    list-style-type: none;
+    padding-left: 0;
+  }
+  
+  .technical-terms li {
+    margin-bottom: 10px;
+    font-size: 1.05rem;
+  }
+  
+  .technical-terms li strong {
+    font-weight: bold;
+    color: #007bff;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .card, .summary-card, .technical-terms {
+      width: 85%;
+      padding: 20px;
+    }
+  
+    .primary-btn, .summarize-btn, .secondary-btn, .cancel-btn {
+      width: 90%;
+      padding: 10px;
+    }
+  
+    .summary-card h2, .technical-terms h2 {
+      font-size: 1.2rem;
+    }
+  
+    .formatted-summary li, .technical-terms li {
+      font-size: 1rem;
+    }
+  }

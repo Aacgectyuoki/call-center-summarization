@@ -43,19 +43,28 @@ exports.getTranscriptionText = async (req, res) => {
     }
 
     try {
-        const fileName = `${jobName}.json`;
-        const signedUrl = await getSignedUrlForFile(fileName);
-        const response = await axios.get(signedUrl);
+        console.log(`📡 Fetching transcription for job: ${jobName}`);
 
+        const fileName = `transcriptions/${jobName}.json`;  // 🔍 Ensure the correct key format
+        console.log(`🗂️ Using file path: ${fileName}`);
+
+        const signedUrl = await getSignedUrlForFile(process.env.S3_BUCKET_NAME, fileName);
+        console.log(`✅ Signed URL: ${signedUrl}`);
+
+        const response = await axios.get(signedUrl);
         const transcriptText = response.data.results.transcripts[0].transcript || "";
-        if (!transcriptText) return res.status(400).json({ message: "No transcription found" });
+
+        if (!transcriptText) {
+            return res.status(400).json({ message: "No transcription found" });
+        }
 
         res.status(200).json({ jobName, transcriptText });
     } catch (error) {
-        console.error("Error fetching transcription:", error);
+        console.error("❌ Error fetching transcription:", error);
         res.status(500).json({ message: "Failed to retrieve transcription", error: error.message });
     }
 };
+
 
 /**
  * Summarize Transcription (Now uses LangChain)

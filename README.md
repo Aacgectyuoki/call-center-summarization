@@ -23,7 +23,6 @@ DT Summarizr is a full-stack AI application that allows users to **upload MP3 or
 ---
 
 ## Features
-
     - Upload **MP3** or **MP4** files
     - Auto-transcribe using **AWS Transcribe**
     - Generate summaries through **LangChain & OpenAI**
@@ -34,46 +33,36 @@ DT Summarizr is a full-stack AI application that allows users to **upload MP3 or
 
 ---
 
-## How the AI Works
+## 🧠 How the AI Works
 
 DT Summarizr follows a streamlined AI pipeline to transcribe and summarize MP3/MP4 files:
 
-    1. **User Uploads File**
+1. **User Uploads File**  
+   The frontend allows users to upload `.mp3` or `.mp4` files.
 
-        The frontend allows users to upload .mp3 or .mp4 files.
+2. **File Sent to Backend**  
+   The uploaded file is sent to the Express.js backend through a POST request.
 
-    2. **File Sent to Backend**
+3. **Stored in AWS S3**  
+   The backend stores the file securely in an AWS S3 bucket.
 
-        The uploaded file is sent to the Express.js backend through a POST request.
+4. **Transcription Triggered**  
+   The backend initiates a transcription job using **AWS Transcribe**.
 
-    3. **Stored in AWS S3**
+5. **Progress Tracked through CloudWatch**  
+   Real-time transcription progress is monitored using **AWS CloudWatch Logs**.
 
-        The backend stores the file securely in an AWS S3 bucket.
+6. **Transcription Completed**  
+   When transcription is complete, the text transcript is retrieved and saved to **MongoDB**.
 
-    4. **Transcription Triggered**
+7. **LangChain Summarization Begins**  
+   The transcript is sent to **LangChain**, which uses **OpenAI** to generate:
+   - Bullet-point summaries  
+   - Section breakdowns  
+   - Definitions for key phrases and technical terms
 
-        The backend initiates a transcription job using **AWS Transcribe**.
-
-    5. **Progress Tracked through CloudWatch**
-
-        Real-time transcription progress is monitored using **AWS CloudWatch Logs**.
-
-    6. **Transcription Completed**
-
-        When transcription is complete, the text transcript is retrieved and saved to **MongoDB**.
-
-    7. **LangChain Summarization Begins**
-
-        The transcript is sent to **LangChain**, which uses **OpenAI** to generate:
-
-            - Bullet-point summaries
-
-            - Definitions for key phrases and technical terms
-
-    8. **Summary Returned to Frontend**
-    
-        The final structured summary is returned to the frontend and presented to the user.
-
+8. **Summary Returned to Frontend**  
+   The final structured summary is returned to the frontend and presented to the user.
 
 ---
 
@@ -106,7 +95,7 @@ DT Summarizr follows a streamlined AI pipeline to transcribe and summarize MP3/M
     ```
 
 3. Install dependencies and start the server:
-    ```
+    ```bash
     npm install
     node server.js
     ```
@@ -136,8 +125,8 @@ DT Summarizr follows a streamlined AI pipeline to transcribe and summarize MP3/M
 ## Authentication
 
 The backend supports JWT authentication:
-    - Some endpoints require a token through the Authorization header.
-    - You may use a static fallback token during testing through .env.
+- Some endpoints require a token through the Authorization header.
+- You may use a static fallback token during testing through .env.
 
 ---
 
@@ -145,16 +134,16 @@ The backend supports JWT authentication:
 
 Backend:
 Use Postman or any REST client to test routes such as:
-    - `POST /api/aws/upload`
-    - `GET /api/aws/transcription-status`
-    - `POST /api/aws/summarize`
+- `POST /api/aws/upload`
+- `GET /api/aws/transcription-status`
+- `POST /api/aws/summarize`
 
 ---
 
 ## Project Structure
 
 ### Backend
-    ```bash
+    ```
     controllers/      # Logic for each feature (auth, AWS, summarize, etc)
     routes/           # Route definitions
     models/           # Mongoose schemas
@@ -164,7 +153,7 @@ Use Postman or any REST client to test routes such as:
     ```
 
 ### Frontend
-    ```bash
+    ```
     src/
     components/     # FileUploader and future components
     App.jsx         # Main app logic
@@ -179,7 +168,7 @@ Use Postman or any REST client to test routes such as:
 ## Full Project Structure
 
 ### backend/
-    ``` bash
+    ```
     backend/
     ├── config/
     │   ├── awsConfig.js
@@ -247,7 +236,7 @@ Use Postman or any REST client to test routes such as:
     ```
 
 ### frontend/
-    ```bash
+    ```
     frontend/
     ├── public/
     │   └── index.html
@@ -276,19 +265,19 @@ Use Postman or any REST client to test routes such as:
 ---
 
 ## Future Improvements
-    - Built-in audio recorder
-    - Video context-aware summarization (movement/audio)
-    - Summary export as PDF or DOCX, with text-image recognition (correct me)
-    - User dashboard and upload history
+- Built-in audio recorder
+- Video context-aware summarization (movement/audio)
+- Summary export as PDF or DOCX, with text-image recognition (correct me)
+- User dashboard and upload history
 
 ---
 
 ## Contributing
 PRs are welcome!
 If you want to contribute:
-    1. Fork the repo
-    2. Create a new branch
-    3. Submit a pull request
+1. Fork the repo
+2. Create a new branch
+3. Submit a pull request
 
 ---
 

@@ -41,10 +41,10 @@ DT Summarizr follows a streamlined AI pipeline to transcribe and summarize MP3/M
    The frontend allows users to upload `.mp3` or `.mp4` files.
 
 2. **File Sent to Backend**  
-   The uploaded file is sent to the Express.js backend through a POST request.
+   The uploaded file is sent to the **Express.js** backend through a POST request.
 
 3. **Stored in AWS S3**  
-   The backend stores the file securely in an AWS S3 bucket.
+   The backend stores the file securely in an **AWS S3** bucket.
 
 4. **Transcription Triggered**  
    The backend initiates a transcription job using **AWS Transcribe**.
@@ -70,7 +70,7 @@ DT Summarizr follows a streamlined AI pipeline to transcribe and summarize MP3/M
 
 1. Clone the repo:
     ```bash
-    git clone https://github.com/yourusername/DT Summarizr-backend.git
+    git clone https://github.com/Aacgectyuoki/call-center-summarization.git
     cd call-center-summarization
     ```
 

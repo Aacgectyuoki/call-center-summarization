@@ -143,19 +143,14 @@ Use Postman or any REST client to test routes such as:
 ## Project Structure
 
 ### Backend
-
-    ```
     controllers/      # Logic for each feature (auth, AWS, summarize, etc)
     routes/           # Route definitions
     models/           # Mongoose schemas
     middleware/       # JWT auth, error logging, timers
     utils/            # AWS, summarizer, progress, file handler
     config/           # DB & AWS config
-    ```
 
 ### Frontend
-
-    ```
     src/
     components/     # FileUploader and future components
     App.jsx         # Main app logic
@@ -163,7 +158,6 @@ Use Postman or any REST client to test routes such as:
     config.js       # API endpoints
     awsCloudWatchConfig.js  # CloudWatch metrics (also in backend)
     styles/         # Custom CSS + Tailwind
-    ```
 
 ---
 

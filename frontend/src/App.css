@@ -20,7 +20,6 @@
   color: #6b7280;
 }
 
-.upload-card,
 .card,
 .summary-card,
 .technical-terms {
@@ -30,6 +29,20 @@
   padding: 2rem;
   margin-top: 1.5rem;
   transition: 0.3s ease;
+}
+
+/* Center the summarize button */
+.summarize-btn {
+  display: block;
+  margin: 1rem auto; /* Center horizontally */
+}
+
+.upload-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .upload-card:hover {
@@ -158,15 +171,17 @@
 .formatted-bullet {
   line-height: 1.7;
   word-wrap: break-word;
-  padding-left: 24px;
   margin-bottom: 0.25rem;
+  padding-left: 24px;
 }
 
+/* Indent level-1 bullets more. */
 .bullet-level-1 {
   padding-left: 1.25rem;
   margin-bottom: 0.5rem;
 }
 
+/* Indent level-2 bullets even further. */
 .bullet-level-2 {
   padding-left: 2.5rem;
   margin-bottom: 0.25rem;
@@ -178,11 +193,26 @@
   font-size: 1.2rem;
   font-weight: 600;
   margin-top: 1.5rem;
-  text-align: center;
+  /* text-align: center; */
 }
 
 .term-definition {
   margin-left: 1rem;
   margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+/* Style for the future plans section */
+.future-plans {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: var(--bg-light);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.future-plans ul {
+  margin-top: 1rem;
+  padding-left: 1.5rem;
   line-height: 1.6;
 }

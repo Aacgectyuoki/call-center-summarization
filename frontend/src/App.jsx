@@ -115,20 +115,34 @@ class App extends Component {
     }
   }
 
-  /**
-   * parseBulletSummary:
-   * Splits the summary into lines, detects bullet levels ("• " for level 1, "◦ " for level 2),
-   * replaces **bold** markers with <strong> tags, and returns an array of indented React divs.
-   */
+  parseBoldSegments(str) {
+    // Splits a string into segments that are either bold, inline code, or plain text.
+    return str.split(/(\*\*.*?\*\*|`.*?`)/g).map((segment, i) => {
+      if (segment.startsWith("**") && segment.endsWith("**")) {
+        // Remove the wrapping ** and return a <strong> element.
+        return <strong key={i}>{segment.slice(2, -2)}</strong>;
+      } else if (segment.startsWith("`") && segment.endsWith("`")) {
+        return (
+          <code
+            key={i}
+            style={{ background: "#f1f5f9", padding: "2px 4px", borderRadius: "4px" }}
+          >
+            {segment.slice(1, -1)}
+          </code>
+        );
+      }
+      return <span key={i}>{segment}</span>;
+    });
+  }
+  
   parseBulletSummary(text) {
-    // Split text by newlines and remove any empty lines
+    // Split the summary text by newlines and filter out empty lines.
     const lines = text.split(/\r?\n/).filter((line) => line.trim() !== "");
-    
-    // Map each line to a React element while logging its metadata
-    const bulletElements = lines.map((line, idx) => {
+  
+    return lines.map((line, idx) => {
       const trimmed = line.trim();
-      
-      // Log metadata for inspection
+  
+      // Log metadata for debugging.
       console.log(`[Line ${idx}]`, {
         raw: trimmed,
         level: trimmed.startsWith("• ") ? 1 : trimmed.startsWith("◦ ") ? 2 : 0,
@@ -137,81 +151,64 @@ class App extends Component {
         boldedSegments: (trimmed.match(/\*\*(.*?)\*\*/g) || []).map(s => s.replace(/\*\*/g, "")),
         hasColon: trimmed.includes(":"),
       });
-      
-      // If the line is a section header (wrapped in **)
+  
+      // 1. Section Header (e.g. **Bullet-Point Summary**)
       if (/^\*\*.+\*\*$/.test(trimmed)) {
+        // Remove the ** markers and parse any inline bold if needed.
+        const content = this.parseBoldSegments(trimmed.replace(/^\*\*(.*)\*\*$/, "$1"));
         return (
-          <div
-            key={idx}
-            className="summary-header"
-            style={{ fontWeight: "bold", marginTop: "1.5rem", paddingLeft: 0 }}
-          >
-            {trimmed.replace(/\*\*/g, "")}
+          <div key={idx} className="summary-header" style={{ fontWeight: "bold", marginTop: "1.5rem", paddingLeft: 0 }}>
+            {content}
           </div>
         );
       }
-      
-      // If the line is a definition (e.g., "• **Term**: Description")
+  
+      // 2. Definition line (e.g. "• **Term**: Description")
       if (trimmed.startsWith("• **") && trimmed.includes(":")) {
-        const [termPart, ...descParts] = trimmed.slice(2).split(":");
+        const defLine = trimmed.slice(2).trim(); // Remove the leading bullet "• "
+        // Split only on the first colon.
+        const colonIndex = defLine.indexOf(":");
+        const termPart = defLine.slice(0, colonIndex);
+        const descPart = defLine.slice(colonIndex + 1).trim();
         return (
           <div key={idx} className="term-definition">
-            <strong>{termPart.replace(/\*\*/g, "").trim()}:</strong> {descParts.join(":").trim()}
+            <strong>{this.parseBoldSegments(termPart.replace(/\*\*/g, "").trim())}:</strong>{" "}
+            {this.parseBoldSegments(descPart)}
           </div>
         );
       }
-      
-      // If the line is a level 1 bullet
+  
+      // 3. Level-1 bullet: "• Some text"
       if (trimmed.startsWith("• ")) {
         const content = trimmed.slice(2).trim();
-        // Split content by bold markers (or code segments) and build components
-        const parts = content.split(/(\*\*.*?\*\*|`.*?`)/g).map((part, i) => {
-          if (part.startsWith("**") && part.endsWith("**")) {
-            return <strong key={i}>{part.slice(2, -2)}</strong>;
-          } else if (part.startsWith("`") && part.endsWith("`")) {
-            return (
-              <code key={i} style={{ background: "#f1f5f9", padding: "2px 4px", borderRadius: "4px" }}>
-                {part.slice(1, -1)}
-              </code>
-            );
-          }
-          return <span key={i}>{part}</span>;
-        });
         return (
           <div key={idx} className="formatted-bullet bullet-level-1">
-            • {parts}
+            • {this.parseBoldSegments(content)}
           </div>
         );
       }
-      
-      // If the line is a level 2 bullet
+  
+      // 4. Level-2 bullet: "◦ Some text"
       if (trimmed.startsWith("◦ ")) {
         const content = trimmed.slice(2).trim();
         return (
           <div key={idx} className="formatted-bullet bullet-level-2">
-            ◦ {content}
+            ◦ {this.parseBoldSegments(content)}
           </div>
         );
       }
-      
-      // Fallback: render the line as is
+  
+      // 5. Fallback: simply parse the line.
       return (
         <div key={idx} className="formatted-bullet">
-          {trimmed}
+          {this.parseBoldSegments(trimmed)}
         </div>
       );
     });
-    
-    // Optionally, log the complete debug table in the console
-    console.table(bulletElements.map((el, idx) => ({
-      index: idx,
-      className: el.props.className || "",
-      content: el.props.children
-    })));
-    
-    return bulletElements;
   }
   
+  
+
 
   /** Upload File & Automatically Start Transcription */
   handleUpload = async (event) => {
@@ -370,28 +367,54 @@ class App extends Component {
   render() {
     return (
       <div className="app-container">
-        <h1 className="section-wrapper centered-text">DT Summarizr</h1>
-        <p className="mb-6">Transform your content into concise, meaningful summaries</p>
+        <div className="section-wrapper">
+          <h1 className="centered-text">DT Summarizr</h1>
+          <h3 className="centered-text">Transform your MP3 and MP4 files into concise, meaningful summaries</h3>
+      </div>
         
         {/* Display error message if any */}
-        {this.state.error && (
+        {/* {this.state.error && (
           <div className="mb-4 p-4 bg-red-100 text-red-800 rounded">
             {this.state.error}
           </div>
-        )}
+        )} */}
 
-        {/* Upload Section (shown only if no job is started) */}
-        {!this.state.jobName && (
-          <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-            <h2 className="text-xl font-semibold mb-4">Upload Content</h2>
-            <FileUploader setFile={(file) => this.setState({ file })} setError={(error) => this.setState({ error })} />
-            <div className="flex space-x-4 mt-4">
-              <button className="bg-blue-600 text-white px-4 py-2 rounded" onClick={this.handleUpload} disabled={!this.state.file}>
-                Upload &amp; Start Transcription
-              </button>
-            </div>
+          {/* Upload Section (shown only if no job is started) */}
+  {!this.state.jobName && (
+    <>
+      <div className="upload-card">
+        <h2 className="text-xl font-semibold mb-4">Upload Content</h2>
+        <FileUploader
+          setFile={(file) => this.handleFileChange({ target: { files: [file] } })}
+          setError={(error) => this.setState({ error })}
+        />
+        {this.state.error && (
+          <div className="mt-2 text-red-600 text-sm">
+            {this.state.error}
           </div>
         )}
+        <div className="flex space-x-4 mt-4">
+          <button
+            className="bg-blue-600 text-white px-4 py-2 rounded"
+            onClick={this.handleUpload}
+            disabled={!this.state.file}
+          >
+            Upload &amp; Start Transcription
+          </button>
+        </div>
+      </div>
+
+      {/* Looking Ahead Section */}
+      <div className="future-plans section-wrapper">
+        <h2 className="centered-text">Looking Ahead</h2>
+        <ul className="list-disc list-inside text-gray-700">
+          <li>Built-in recorder</li>
+          <li>Video recognition by audio and movement</li>
+          <li>Different settings for summarization</li>
+        </ul>
+      </div>
+    </>
+  )}
 
         {/* Progress Bar Section */}
         {this.state.jobName && this.state.status === "IN_PROGRESS" && (
@@ -420,7 +443,7 @@ class App extends Component {
         {/* Summary Display */}
         {this.state.summaryContent.length > 0 && (
           <div className="section-wrapper">
-            <h2 className="primary-btn">Summary</h2>
+            {/* <h2 className="primary-btn">Summary</h2> */}
             <div className="formatted-summary">{this.state.summaryContent}</div>
           </div>
         )}

@@ -121,40 +121,56 @@ class App extends Component {
    * replaces **bold** markers with <strong> tags, and returns an array of indented React divs.
    */
   parseBulletSummary(text) {
+    // Split text by newlines and remove any empty lines
     const lines = text.split(/\r?\n/).filter((line) => line.trim() !== "");
-
-    return lines.map((line, idx) => {
+    
+    // Map each line to a React element while logging its metadata
+    const bulletElements = lines.map((line, idx) => {
       const trimmed = line.trim();
-
-      // Section header like "**Bullet-Point Summary**"
+      
+      // Log metadata for inspection
+      console.log(`[Line ${idx}]`, {
+        raw: trimmed,
+        level: trimmed.startsWith("• ") ? 1 : trimmed.startsWith("◦ ") ? 2 : 0,
+        isHeader: /^\*\*.+\*\*$/.test(trimmed),
+        isDefinition: trimmed.startsWith("• **") && trimmed.includes(":"),
+        boldedSegments: (trimmed.match(/\*\*(.*?)\*\*/g) || []).map(s => s.replace(/\*\*/g, "")),
+        hasColon: trimmed.includes(":"),
+      });
+      
+      // If the line is a section header (wrapped in **)
       if (/^\*\*.+\*\*$/.test(trimmed)) {
         return (
           <div
             key={idx}
             className="summary-header"
-            style={{ fontWeight: "bold", marginTop: "1.5rem" }}
+            style={{ fontWeight: "bold", marginTop: "1.5rem", paddingLeft: 0 }}
           >
             {trimmed.replace(/\*\*/g, "")}
           </div>
         );
       }
-
-      // Bullet level 1
+      
+      // If the line is a definition (e.g., "• **Term**: Description")
+      if (trimmed.startsWith("• **") && trimmed.includes(":")) {
+        const [termPart, ...descParts] = trimmed.slice(2).split(":");
+        return (
+          <div key={idx} className="term-definition">
+            <strong>{termPart.replace(/\*\*/g, "").trim()}:</strong> {descParts.join(":").trim()}
+          </div>
+        );
+      }
+      
+      // If the line is a level 1 bullet
       if (trimmed.startsWith("• ")) {
         const content = trimmed.slice(2).trim();
+        // Split content by bold markers (or code segments) and build components
         const parts = content.split(/(\*\*.*?\*\*|`.*?`)/g).map((part, i) => {
           if (part.startsWith("**") && part.endsWith("**")) {
             return <strong key={i}>{part.slice(2, -2)}</strong>;
           } else if (part.startsWith("`") && part.endsWith("`")) {
             return (
-              <code
-                key={i}
-                style={{
-                  background: "#f1f5f9",
-                  padding: "2px 4px",
-                  borderRadius: "4px",
-                }}
-              >
+              <code key={i} style={{ background: "#f1f5f9", padding: "2px 4px", borderRadius: "4px" }}>
                 {part.slice(1, -1)}
               </code>
             );
@@ -167,8 +183,8 @@ class App extends Component {
           </div>
         );
       }
-
-      // Bullet level 2
+      
+      // If the line is a level 2 bullet
       if (trimmed.startsWith("◦ ")) {
         const content = trimmed.slice(2).trim();
         return (
@@ -177,14 +193,23 @@ class App extends Component {
           </div>
         );
       }
-
-      // Fallback
+      
+      // Fallback: render the line as is
       return (
         <div key={idx} className="formatted-bullet">
           {trimmed}
         </div>
       );
     });
+    
+    // Optionally, log the complete debug table in the console
+    console.table(bulletElements.map((el, idx) => ({
+      index: idx,
+      className: el.props.className || "",
+      content: el.props.children
+    })));
+    
+    return bulletElements;
   }
   
 

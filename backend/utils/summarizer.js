@@ -29,30 +29,53 @@ const summaryPrompt = new PromptTemplate({
     **Example Output Format**:
     
     **Bullet-Point Summary**
-       • **Introduction**
-          ◦ Mr. Abc, an SDE at Abc, introduces the fundamentals of database systems.
+    **Introduction**
+        • Mr. Abc, an SDE at Abc, introduces the fundamentals of database systems.
     
-       • **Agenda Overview**
-          ◦ Topics include general database overview, SQL, data storage, cloud computing, database management, internals of databases, and interview preparation.
+    **Agenda Overview**
+        • Topics include general database overview, SQL, data storage, cloud computing, database management, internals of databases, and interview preparation.
     
-       • **Importance of Database Knowledge in Interviews**
-          ◦ Emphasis on broad knowledge in various database types and SQL for interviews.
-          ◦ Importance of demonstrating both breadth and depth of knowledge.
+    **Importance of Database Knowledge in Interviews**
+        • Emphasis on broad knowledge in various database types and SQL for interviews.
+        • Importance of demonstrating both breadth and depth of knowledge.
     
-       **Types of Databases**
-       • **SQL Databases**
+    **Types of Databases**
+        • **SQL Databases**
           ◦ Traditional, relational databases with structured schema and static tables.
           ◦ Examples: Oracle, MySQL, SQL Server.
           ◦ Known for ACID properties ensuring reliable transaction processing.
-       • **NoSQL Databases**
+        • **NoSQL Databases**
           ◦ More flexible, suitable for non-static schemas and horizontal scaling.
           ◦ Types include document, graph, and time-series databases.
           ◦ Examples: MongoDB, DynamoDB, Neo4J.
 
     **Technical Terms and Their Definitions**
-       • **SDE (Software Development Engineer)**: A professional who applies engineering principles to software development.
-       • **SQL (Structured Query Language)**: A programming language used for managing and manipulating relational databases.
-       • **ACID (Atomicity, Consistency, Isolation, Durability)**: Properties that ensure reliable processing of database transactions.
+        • **SDE (Software Development Engineer)**: A professional who applies engineering principles to software development.
+        • **SQL (Structured Query Language)**: A programming language used for managing and manipulating relational databases.
+        • **ACID (Atomicity, Consistency, Isolation, Durability)**: Properties that ensure reliable processing of database transactions.
+
+
+    **Example Input Format 2 **:
+
+    **Bullet-Point Summary**
+    **Introduction to Cloud Computing Models**: 
+        • **Overview of the three primary types of cloud services**: SaaS, IaaS, and PaaS.
+
+    **Software as a Service (SaaS)** 
+        • Defined as application access over the web, managed by a third-party vendor.
+        • Benefits include avoiding software maintenance, infrastructure management, and security responsibilities.
+        • Examples include Slack, Dropbox, and Google Apps (Gmail, Google Drive, Google Sheets).
+
+    **Infrastructure as a Service (IaaS)** 
+        • Provides on-demand computing and storage capabilities via the internet.
+        • Operates on a pay-as-you-go billing model, where costs are based on resource usage.
+        • Examples include Amazon EC2 for computing instances and Amazon DynamoDB for databases.
+
+    **Technical Terms and Their Definitions*
+        • **SaaS (Software as a Service)**: A software distribution model where applications are hosted by a third-party provider and delivered over the internet.
+        • **IaaS (Infrastructure as a Service)**: Provides virtualized computing resources over the internet on a scalable, pay-as-you-go basis.
+        • **PaaS (Platform as a Service)**: A cloud computing service that offers a platform for developing, running, and managing applications without the complexity of building and maintaining the underlying infrastructure.
+
 
     **Ensure the following**:
     - Main points should be bolded using "**bold text**".

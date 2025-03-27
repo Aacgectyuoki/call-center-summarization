@@ -130,23 +130,23 @@
   word-wrap: break-word;
 }
 
-.formatted-summary div:nth-child(n) {
+/* .formatted-summary div:nth-child(n) {
   margin-left: 0;
-}
+} */
 
-.formatted-summary div:has(strong) {
+/* .formatted-summary div:has(strong) {
   margin-top: 1.2rem;
-}
+} */
 
 /* Indentation for Level 1 (•) */
-.formatted-summary div:has(:not(strong)) {
+/* .formatted-summary div:has(:not(strong)) {
   margin-left: 1rem;
-}
+} */
 
 /* Indentation for Level 2 (◦) */
-.formatted-summary div:has(:not(strong)):has(> [style*="margin-left: 40px"]) {
+/* .formatted-summary div:has(:not(strong)):has(> [style*="margin-left: 40px"]) {
   margin-left: 2rem;
-}
+} */
 
 
 .formatted-summary strong {
@@ -158,7 +158,6 @@
 .formatted-bullet {
   line-height: 1.7;
   word-wrap: break-word;
-  text-indent: -16px;
   padding-left: 24px;
   margin-bottom: 0.25rem;
 }
@@ -175,14 +174,15 @@
   font-size: 0.95rem;
 }
 
-.term-definition {
-  margin-left: 1rem;
-  margin-bottom: 0.5rem;
-  line-height: 1.6;
-}
-
 .summary-header {
   font-size: 1.2rem;
   font-weight: 600;
   margin-top: 1.5rem;
+  text-align: center;
+}
+
+.term-definition {
+  margin-left: 1rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
 }

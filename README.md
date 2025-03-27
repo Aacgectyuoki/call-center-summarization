@@ -33,7 +33,7 @@ DT Summarizr is a full-stack AI application that allows users to **upload MP3 or
 
 ---
 
-## 🧠 How the AI Works
+## How the AI Works
 
 DT Summarizr follows a streamlined AI pipeline to transcribe and summarize MP3/MP4 files:
 

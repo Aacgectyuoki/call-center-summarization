@@ -59,4 +59,7 @@ const getTranscriptByJobName = async (jobName) => {
     }
 };
 
-module.exports = { saveTranscriptionJob, getTranscriptByJobName };
+module.exports = {
+    saveTranscriptionJob,
+    getTranscriptByJobName
+  };

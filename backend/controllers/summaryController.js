@@ -11,10 +11,24 @@ const generateSummary = async (req, res) => {
 
         // Fetch transcription from S3
         const key = `${jobName}.json`;
-        const transcript = await fetchS3File(process.env.S3_BUCKET_NAME, key); // ✅ Now fetchS3File is defined
+        const transcriptData = await fetchS3File(process.env.S3_BUCKET_NAME, key);
 
-        if (!transcript || transcript.trim() === "") {
-            return res.status(400).json({ error: "Empty or invalid transcription data" });
+        console.log("Fetched transcript data type:", typeof transcriptData); // Log the type of fetched data
+        console.log("Fetched transcript data:", transcriptData); // Log the fetched data
+
+        if (!transcriptData || typeof transcriptData !== 'object') {
+            return res.status(400).json({ error: "Invalid transcription data" });
+        }
+
+        // Extract the transcription text
+        const transcriptsArray = transcriptData.results?.transcripts;
+        if (!transcriptsArray || transcriptsArray.length === 0) {
+            return res.status(400).json({ error: "No transcription text found" });
+        }
+
+        const transcript = transcriptsArray[0]?.transcript?.trim();
+        if (!transcript) {
+            return res.status(400).json({ error: "Empty transcription data" });
         }
 
         // Call summarization logic

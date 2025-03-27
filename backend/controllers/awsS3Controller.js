@@ -17,17 +17,34 @@ const s3Client = new S3Client({ region: REGION });
 const uploadAudio = async (req, res) => {
     try {
         if (!req.file) {
-            console.error("❌ No file received from client");
-            return res.status(400).json({ error: "No file received" });
+            return res.status(400).json({ error: "No file uploaded" });
         }
 
-        console.log("📂 Received file:", req.file.originalname);
+        const file = req.file;
+        const localFilePath = path.join(__dirname, "../uploads", file.filename);
+        console.log("📂 Local File Path:", localFilePath);
 
-        const fileUrl = await uploadFileToS3(req.file);
+        if (!fs.existsSync(localFilePath)) {
+            return res.status(500).json({ error: "File was not saved correctly" });
+        }
 
-        res.status(200).json({ message: "File uploaded successfully", fileUrl });
+        const s3Url = await uploadFileToS3(file);
+        console.log("☁️ File uploaded to S3:", s3Url);
+
+        if (!s3Url) {
+            return res.status(500).json({ error: "Failed to upload file to S3" });
+        }
+
+        // ✅ Pass localFilePath to transcription
+        const transcriptionJobId = await startTranscriptionJob(s3Url, localFilePath);
+
+        res.json({
+            message: "File uploaded and transcription started",
+            transcriptionJobId,
+        });
+
     } catch (error) {
-        console.error("❌ Error in uploadAudio:", error);
+        console.error("S3 Upload Error:", error);
         res.status(500).json({ error: "Failed to upload file" });
     }
 };

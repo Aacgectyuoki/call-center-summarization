@@ -30,9 +30,7 @@ build/
 # Ignore test coverage
 coverage/
 .env
-<<<<<<< HEAD
 
-<<<<<<< HEAD
 # Ignore virtual environment
 .venv/
 
@@ -48,10 +46,7 @@ data/summary.txt
 # Ignore media files
 *.mp3
 *.wav
+*.mp4
 *.mp4.venv/
-=======
-.venv/
-venv/
->>>>>>> main
-=======
->>>>>>> 7f6b113e (Removed .env from tracking)
+
+uploads/

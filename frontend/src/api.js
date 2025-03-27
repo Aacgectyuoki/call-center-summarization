@@ -18,10 +18,9 @@ export const transcribeFile = async (fileId) => {
 
 // Get Transcription Status
 export const checkTranscriptionStatus = async (jobName) => {
-    console.log("Checking status for:", jobName); // Debugging
+    console.log("Checking status for:", jobName);
     return axios.get(`${API_ROUTES.CHECK_STATUS}?jobName=${jobName}`);
 };
-
 
 // Fetch Transcription Text
 export const getTranscriptionText = async (jobName) => {

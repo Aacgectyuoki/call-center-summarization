@@ -121,30 +121,72 @@ class App extends Component {
    * replaces **bold** markers with <strong> tags, and returns an array of indented React divs.
    */
   parseBulletSummary(text) {
-    const lines = text.split(/\r?\n/);
-    return lines.map((line, idx) => {
-      let level = 0;
-      let bulletChar = "";
-      let processedLine = line;
+    const lines = text.split(/\r?\n/).filter((line) => line.trim() !== "");
 
-      if (processedLine.startsWith("• ")) {
-        level = 1;
-        bulletChar = "•";
-        processedLine = processedLine.slice(2).trim();
-      } else if (processedLine.startsWith("◦ ")) {
-        level = 2;
-        bulletChar = "◦";
-        processedLine = processedLine.slice(2).trim();
+    return lines.map((line, idx) => {
+      const trimmed = line.trim();
+
+      // Section header like "**Bullet-Point Summary**"
+      if (/^\*\*.+\*\*$/.test(trimmed)) {
+        return (
+          <div
+            key={idx}
+            className="summary-header"
+            style={{ fontWeight: "bold", marginTop: "1.5rem" }}
+          >
+            {trimmed.replace(/\*\*/g, "")}
+          </div>
+        );
       }
 
-      processedLine = processedLine.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-      const style = { marginLeft: `${level * 20}px` };
+      // Bullet level 1
+      if (trimmed.startsWith("• ")) {
+        const content = trimmed.slice(2).trim();
+        const parts = content.split(/(\*\*.*?\*\*|`.*?`)/g).map((part, i) => {
+          if (part.startsWith("**") && part.endsWith("**")) {
+            return <strong key={i}>{part.slice(2, -2)}</strong>;
+          } else if (part.startsWith("`") && part.endsWith("`")) {
+            return (
+              <code
+                key={i}
+                style={{
+                  background: "#f1f5f9",
+                  padding: "2px 4px",
+                  borderRadius: "4px",
+                }}
+              >
+                {part.slice(1, -1)}
+              </code>
+            );
+          }
+          return <span key={i}>{part}</span>;
+        });
+        return (
+          <div key={idx} className="formatted-bullet bullet-level-1">
+            • {parts}
+          </div>
+        );
+      }
 
+      // Bullet level 2
+      if (trimmed.startsWith("◦ ")) {
+        const content = trimmed.slice(2).trim();
+        return (
+          <div key={idx} className="formatted-bullet bullet-level-2">
+            ◦ {content}
+          </div>
+        );
+      }
+
+      // Fallback
       return (
-        <div key={idx} style={style} dangerouslySetInnerHTML={{ __html: bulletChar + " " + processedLine }} />
+        <div key={idx} className="formatted-bullet">
+          {trimmed}
+        </div>
       );
     });
   }
+  
 
   /** Upload File & Automatically Start Transcription */
   handleUpload = async (event) => {
@@ -215,62 +257,57 @@ class App extends Component {
 
   /** Fetch Transcription */
   handleFetchTranscription = async () => {
-    if (!this.state.jobName) {
-      console.warn("⚠️ No transcription job available.");
-      return;
-    }
-    console.log("🔄 Fetching transcription for job:", this.state.jobName);
     try {
-      const urlResponse = await axios.get(`${API_ROUTES.GET_S3_FILE_URL}?jobName=${this.state.jobName}`);
-      if (urlResponse.data?.s3Url) {
-        const s3Url = urlResponse.data.s3Url;
-        console.log("✅ Retrieved S3 URL:", s3Url);
-        
-        const corsProxy = "https://thingproxy.freeboard.io/fetch/";
-        const s3Response = await axios.get(corsProxy + s3Url);
-        
-        const transcriptText = s3Response.data.results?.transcripts[0]?.transcript || "";
-        if (!transcriptText) {
-          console.error("No transcription found in S3 file");
-          return;
-        }
-        this.setState({ transcription: transcriptText });
-        console.log("✅ Transcription stored:", transcriptText);
-      } else {
-        console.error("No S3 URL returned from backend");
-      }
+      const response = await axios.get(
+        `${API_ROUTES.GET_S3_FILE_URL}?jobName=${this.state.jobName}`
+      );
+      const s3Url = response.data?.s3Url;
+      if (!s3Url) throw new Error("No S3 URL");
+
+      const proxy = "https://thingproxy.freeboard.io/fetch/";
+      const s3Response = await axios.get(proxy + s3Url);
+      const transcriptText =
+        s3Response.data.results?.transcripts[0]?.transcript || "";
+
+      if (!transcriptText) return;
+      this.setState({ transcription: transcriptText });
     } catch (error) {
-      console.error("❌ Error fetching transcription:", error);
+      console.error("❌ Fetch Transcription Error:", error);
     }
   };
 
   /** Summarize Transcription */
   handleSummarize = async () => {
     if (!this.state.transcription) {
-      console.warn("⚠️ No transcription found. Fetching first...");
       await this.handleFetchTranscription();
     }
+
     if (!this.state.transcription) {
-      console.error("❌ Still no transcription available. Aborting summarization.");
       this.setState({ error: "⚠️ Cannot summarize. Transcription is missing." });
       return;
     }
-    console.log("🔄 Starting Summarization...");
-    this.setState({ isSummarizing: true, progress: 0, summaryContent: [], technicalDefinitions: [] });
+
     try {
-      console.log("📡 Sending transcript to backend:", this.state.transcription);
-      const { jobName, summaryOptions, transcription } = this.state;
-      if (!jobName || !transcription.trim()) {
-        throw new Error("Invalid request: No jobName or transcription text provided.");
-      }
-      const response = await summarizeText(jobName, summaryOptions.length, summaryOptions.complexity, summaryOptions.format);
-      console.log("📡 API Response:", response.data);
-      const summaryText = response.data.summary?.summary || response.data.summary.text;
-      let technicalTerms = response.data.technicalTerms || [];
-      if (!summaryText) {
-        console.error("❌ Summary is missing in response:", response.data);
-        throw new Error("Invalid summary format from backend");
-      }
+      this.setState({
+        isSummarizing: true,
+        summaryContent: [],
+        technicalDefinitions: [],
+        progress: 0,
+      });
+
+      const { jobName, summaryOptions } = this.state;
+
+      const response = await summarizeText(
+        jobName,
+        summaryOptions.length,
+        summaryOptions.complexity,
+        summaryOptions.format
+      );
+
+      const summaryText =
+        response.data.summary?.summary || response.data.summary.text;
+      const technicalTerms = response.data.technicalTerms || [];
+
       const bulletElements = this.parseBulletSummary(summaryText);
       this.setState({
         summaryContent: bulletElements,
@@ -278,10 +315,12 @@ class App extends Component {
         isSummarizing: false,
         progress: 100,
       });
-      console.log("✅ Summary & Technical Terms Generated!");
     } catch (error) {
       console.error("❌ Summarization Error:", error);
-      this.setState({ isSummarizing: false, progress: 0, error: "⚠️ Failed to summarize. Please try again." });
+      this.setState({
+        isSummarizing: false,
+        error: "⚠️ Failed to summarize. Please try again.",
+      });
     }
   };
 
@@ -305,10 +344,10 @@ class App extends Component {
 
   render() {
     return (
-      <div className="min-h-screen bg-gray-100 text-gray-800 p-8">
-        <h1 className="text-3xl font-bold mb-4">DT Summarizr</h1>
+      <div className="app-container">
+        <h1 className="section-wrapper centered-text">DT Summarizr</h1>
         <p className="mb-6">Transform your content into concise, meaningful summaries</p>
-
+        
         {/* Display error message if any */}
         {this.state.error && (
           <div className="mb-4 p-4 bg-red-100 text-red-800 rounded">
@@ -355,20 +394,26 @@ class App extends Component {
 
         {/* Summary Display */}
         {this.state.summaryContent.length > 0 && (
-          <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-            <h2 className="text-xl font-semibold mb-4">Summary</h2>
+          <div className="section-wrapper">
+            <h2 className="primary-btn">Summary</h2>
             <div className="formatted-summary">{this.state.summaryContent}</div>
           </div>
         )}
 
-        {/* Technical Terms Display */}
+        <br />
+
         {this.state.technicalDefinitions.length > 0 && (
-          <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-            <h2 className="text-xl font-semibold mb-4">Technical Terms</h2>
+          <div className="section-wrapper">
+            <h2>Technical Terms</h2>
             <ul>
-              {this.state.technicalDefinitions.map((term, index) => (
-                <li key={index}>{term}</li>
-              ))}
+              {this.state.technicalDefinitions.map((term, index) => {
+                const [label, ...descParts] = term.split(":");
+                return (
+                  <li key={index} style={{ marginBottom: "0.75rem" }}>
+                    <strong>{label.trim()}:</strong> {descParts.join(":").trim()}
+                  </li>
+                );
+              })}
             </ul>
           </div>
         )}

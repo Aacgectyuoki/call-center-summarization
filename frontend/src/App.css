@@ -192,27 +192,20 @@
 .summary-header {
   font-size: 1.2rem;
   font-weight: 600;
-  margin-top: 1.5rem;
+  margin-top: 1.25rem;
   /* text-align: center; */
 }
 
 .term-definition {
   margin-left: 1rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
   line-height: 1.6;
 }
 
-/* Style for the future plans section */
-.future-plans {
-  margin-top: 2rem;
-  padding: 1.5rem;
-  background: var(--bg-light);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
+.flex {
+  display: flex;
 }
 
-.future-plans ul {
-  margin-top: 1rem;
-  padding-left: 1.5rem;
-  line-height: 1.6;
+.justify-center {
+  justify-content: center;
 }

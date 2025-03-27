@@ -367,10 +367,15 @@ class App extends Component {
   render() {
     return (
       <div className="app-container">
-        <div className="section-wrapper">
+        <div
+          className="section-wrapper clickable-card"
+          onClick={() => window.location.reload()}
+          style={{ cursor: "pointer" }}
+        >
           <h1 className="centered-text">DT Summarizr</h1>
           <h3 className="centered-text">Transform your MP3 and MP4 files into concise, meaningful summaries</h3>
-      </div>
+          <h5 className="centered-text">Click Me if you want to go back home, or re-do your upload</h5>
+        </div>
         
         {/* Display error message if any */}
         {/* {this.state.error && (
@@ -380,46 +385,46 @@ class App extends Component {
         )} */}
 
           {/* Upload Section (shown only if no job is started) */}
-  {!this.state.jobName && (
-    <>
-      <div className="upload-card">
-        <h2 className="text-xl font-semibold mb-4">Upload Content</h2>
-        <FileUploader
-          setFile={(file) => this.handleFileChange({ target: { files: [file] } })}
-          setError={(error) => this.setState({ error })}
-        />
-        {this.state.error && (
-          <div className="mt-2 text-red-600 text-sm">
-            {this.state.error}
-          </div>
-        )}
-        <div className="flex space-x-4 mt-4">
-          <button
-            className="bg-blue-600 text-white px-4 py-2 rounded"
-            onClick={this.handleUpload}
-            disabled={!this.state.file}
-          >
-            Upload &amp; Start Transcription
-          </button>
-        </div>
-      </div>
+        {!this.state.jobName && (
+          <>
+            <div className="upload-card">
+              <h2 className="text-xl font-semibold mb-4">Upload Content</h2>
+              <FileUploader
+                setFile={(file) => this.handleFileChange({ target: { files: [file] } })}
+                setError={(error) => this.setState({ error })}
+              />
+              {this.state.error && (
+                <div className="mt-2 text-red-600 text-sm">
+                  {this.state.error}
+                </div>
+              )}
+              <div className="flex justify-center mt-4">
+                <button
+                  className="bg-blue-600 text-white px-4 py-2 rounded"
+                  onClick={this.handleUpload}
+                  disabled={!this.state.file}
+                >
+                  Upload &amp; Start Transcription
+                </button>
+              </div>
+            </div>
 
-      {/* Looking Ahead Section */}
-      <div className="future-plans section-wrapper">
-        <h2 className="centered-text">Looking Ahead</h2>
-        <ul className="list-disc list-inside text-gray-700">
-          <li>Built-in recorder</li>
-          <li>Video recognition by audio and movement</li>
-          <li>Different settings for summarization</li>
-        </ul>
-      </div>
-    </>
-  )}
+            {/* Looking Ahead Section */}
+            <div className="future-plans section-wrapper">
+              <h2 className="centered-text">Looking Ahead</h2>
+              <ul className="list-disc list-inside text-gray-700">
+                <li>Built-in recorder</li>
+                <li>Video recognition by audio and movement</li>
+                <li>Different settings for summarization</li>
+              </ul>
+            </div>
+          </>
+        )}
 
         {/* Progress Bar Section */}
         {this.state.jobName && this.state.status === "IN_PROGRESS" && (
           <div className="mb-6">
-            <p className="mb-2">Progress: {this.state.progress}%</p>
+            <h2 className="mb-2 centered-text">Progress: {this.state.progress}%</h2>
             <div className="w-full bg-gray-300 rounded-full h-4">
               <div className="bg-blue-600 h-4 rounded-full" style={{ width: `${this.state.progress}%` }}></div>
             </div>
@@ -429,14 +434,15 @@ class App extends Component {
         {/* Transcription Display and Summarization Trigger */}
         {this.state.status === "COMPLETED" && this.state.transcription && (
           <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-            {/* <h2 className="text-xl font-semibold mb-4">Transcription</h2> */}
-            <button
-              className="bg-green-600 text-white px-4 py-2 rounded"
-              onClick={this.handleSummarize}
-              disabled={this.state.isSummarizing}
-            >
-              {this.state.isSummarizing ? "Summarizing..." : "Summarize Transcription"}
-            </button>
+            <div className="flex justify-center">
+              <button
+                className="bg-green-600 text-white px-4 py-2 rounded"
+                onClick={this.handleSummarize}
+                disabled={this.state.isSummarizing}
+              >
+                {this.state.isSummarizing ? "Summarizing..." : "Summarize Transcription"}
+              </button>
+            </div>
           </div>
         )}
 
@@ -457,7 +463,7 @@ class App extends Component {
               {this.state.technicalDefinitions.map((term, index) => {
                 const [label, ...descParts] = term.split(":");
                 return (
-                  <li key={index} style={{ marginBottom: "0.75rem" }}>
+                  <li key={index} style={{ marginBottom: "0.25rem" }}>
                     <strong>{label.trim()}:</strong> {descParts.join(":").trim()}
                   </li>
                 );

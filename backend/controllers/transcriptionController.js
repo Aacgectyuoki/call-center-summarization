@@ -41,7 +41,7 @@ async function transcribeAudio(req, res) {
     const startTime = Date.now();
     const fileType = "mp3"; // Or parse from audioUrl
     // const audioDuration = (Date.now() - startTime) / 1000;
-    const audioDuration = 60; // Replace with actual metadata if needed
+    const audioDuration = 200; // Replace with actual metadata if needed
     trackEstimatedProgress(jobName, startTime, fileType, audioDuration);
 
   } catch (error) {

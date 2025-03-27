@@ -23,6 +23,7 @@ DT Summarizr is a full-stack AI application that allows users to **upload MP3 or
 ---
 
 ## Features
+
     - Upload **MP3** or **MP4** files
     - Auto-transcribe using **AWS Transcribe**
     - Generate summaries through **LangChain & OpenAI**
@@ -36,23 +37,41 @@ DT Summarizr is a full-stack AI application that allows users to **upload MP3 or
 ## How the AI Works
 
 DT Summarizr follows a streamlined AI pipeline to transcribe and summarize MP3/MP4 files:
+
     1. **User Uploads File**
+
         The frontend allows users to upload .mp3 or .mp4 files.
+
     2. **File Sent to Backend**
+
         The uploaded file is sent to the Express.js backend through a POST request.
+
     3. **Stored in AWS S3**
+
         The backend stores the file securely in an AWS S3 bucket.
+
     4. **Transcription Triggered**
+
         The backend initiates a transcription job using **AWS Transcribe**.
+
     5. **Progress Tracked through CloudWatch**
+
         Real-time transcription progress is monitored using **AWS CloudWatch Logs**.
+
     6. **Transcription Completed**
+
         When transcription is complete, the text transcript is retrieved and saved to **MongoDB**.
+
     7. **LangChain Summarization Begins**
+
         The transcript is sent to **LangChain**, which uses **OpenAI** to generate:
+
             - Bullet-point summaries
+
             - Definitions for key phrases and technical terms
+
     8. **Summary Returned to Frontend**
+    
         The final structured summary is returned to the frontend and presented to the user.
 
 

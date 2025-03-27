@@ -170,8 +170,6 @@ Use Postman or any REST client to test routes such as:
 ## Full Project Structure
 
 ### backend/
-
-    ```
     backend/
     ├── config/
     │   ├── awsConfig.js
@@ -236,11 +234,8 @@ Use Postman or any REST client to test routes such as:
     ├── package.json
     ├── package-lock.json
     ├── tsconfig.json
-    ```
 
 ### frontend/
-
-    ```
     frontend/
     ├── public/
     │   └── index.html
@@ -264,7 +259,6 @@ Use Postman or any REST client to test routes such as:
     ├── postcss.config.js
     ├── vite.config.js
     ├── README.md
-    ```
 
 ---
 

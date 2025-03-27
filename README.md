@@ -7,29 +7,29 @@ DT Summarizr is a full-stack AI application that allows users to **upload MP3 or
 ## Tech Stack
 
 **Frontend**  
-    - React 18 + Vite  
-    - TailwindCSS
-    - AWS CloudWatch SDK  
-    - Axios
+- React 18 + Vite  
+- TailwindCSS
+- AWS CloudWatch SDK  
+- Axios
 
 **Backend**  
-    - Node.js + Express.js  
-    - MongoDB + Mongoose  
-    - AWS S3, Transcribe, Lambda, CloudWatch  
-    - LangChain (OpenAI integration)  
-    - JWT Auth  
-    - Modular MVC structure
+- Node.js + Express.js  
+- MongoDB + Mongoose  
+- AWS S3, Transcribe, Lambda, CloudWatch  
+- LangChain (OpenAI integration)  
+- JWT Auth  
+- Modular MVC structure
 
 ---
 
 ## Features
-    - Upload **MP3** or **MP4** files
-    - Auto-transcribe using **AWS Transcribe**
-    - Generate summaries through **LangChain & OpenAI**
-    - Real-time progress through **AWS CloudWatch**
-    - JWT-authenticated API (with `.env` token fallback)
-    - Technical term highlighting + formatting
-    - File storage on **AWS S3**, data stored in **MongoDB**
+- Upload **MP3** or **MP4** files
+- Auto-transcribe using **AWS Transcribe**
+- Generate summaries through **LangChain & OpenAI**
+- Real-time progress through **AWS CloudWatch**
+- JWT-authenticated API (with `.env` token fallback)
+- Technical term highlighting + formatting
+- File storage on **AWS S3**, data stored in **MongoDB**
 
 ---
 
@@ -143,6 +143,7 @@ Use Postman or any REST client to test routes such as:
 ## Project Structure
 
 ### Backend
+
     ```
     controllers/      # Logic for each feature (auth, AWS, summarize, etc)
     routes/           # Route definitions
@@ -153,6 +154,7 @@ Use Postman or any REST client to test routes such as:
     ```
 
 ### Frontend
+
     ```
     src/
     components/     # FileUploader and future components
@@ -168,6 +170,7 @@ Use Postman or any REST client to test routes such as:
 ## Full Project Structure
 
 ### backend/
+
     ```
     backend/
     ├── config/
@@ -236,6 +239,7 @@ Use Postman or any REST client to test routes such as:
     ```
 
 ### frontend/
+
     ```
     frontend/
     ├── public/

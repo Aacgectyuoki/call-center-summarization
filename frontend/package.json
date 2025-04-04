@@ -8,7 +8,8 @@
     "build": "vite build",
     "serve": "vite preview",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "npm run build && rm -rf temp-gh-pages && mkdir temp-gh-pages && cp -r dist/* temp-gh-pages && touch temp-gh-pages/.nojekyll && npx gh-pages -d temp-gh-pages -b gh-pages && rm -rf temp-gh-pages"
   },
   "dependencies": {
     "@aws-sdk/client-cloudwatch-logs": "^3.775.0",

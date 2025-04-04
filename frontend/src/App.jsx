@@ -286,8 +286,18 @@ class App extends Component {
       const s3Url = response.data?.s3Url;
       if (!s3Url) throw new Error("No S3 URL");
 
-      const proxy = "https://thingproxy.freeboard.io/fetch/";
-      const s3Response = await axios.get(proxy + s3Url);
+      // const proxy = "https://thingproxy.freeboard.io/fetch/";
+      // const s3Response = await axios.get(proxy + s3Url);
+
+      const timestamp = this.state.jobName?.split("transcription-")[1];
+      if (!timestamp) throw new Error("Invalid jobName format");
+
+      const transcriptionFilename = `transcription-${timestamp}.json`;
+
+      const s3Response = await axios.get("http://localhost:5000/api/aws/proxy-json", {
+        params: { filename: transcriptionFilename }
+      });      
+
       const transcriptText =
         s3Response.data.results?.transcripts[0]?.transcript || "";
 

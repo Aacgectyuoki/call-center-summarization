@@ -4,7 +4,7 @@ import axios from "axios";
 import { checkTranscriptionStatus, summarizeText, getTranscriptionText } from "./api";
 import { CloudWatchLogsClient, GetLogEventsCommand, DescribeLogStreamsCommand } from "@aws-sdk/client-cloudwatch-logs";
 import "./App.css";
-import { API_ROUTES } from "./config";
+import { API_ROUTES, API_BASE_URL } from "./config";
 import { AWS_CLOUDWATCH_CONFIG } from "./awsCloudWatchConfig";
 
 // Create a CloudWatchLogs client outside the component
@@ -224,15 +224,23 @@ class App extends Component {
     console.log("📡 Uploading file...");
 
     try {
-      const response = await axios.post("http://localhost:5000/api/aws/upload", formData, {
+      const response = await axios.post(`${API_BASE_URL}/api/aws/upload`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
       if (response.data?.transcriptionJobId) {
-        this.setState({
-          jobName: response.data.transcriptionJobId,
-          status: "IN_PROGRESS",
-        });
+        this.setState(
+          {
+            jobName: response.data.transcriptionJobId,
+            status: "IN_PROGRESS",
+            progress: 0,
+          },
+          () => {
+            if (!this.progressInterval) {
+              this.progressInterval = setInterval(this.handleCheckStatus, 5000);
+            }
+          }
+        );
         console.log("✅ File uploaded and transcription started. Job Name:", response.data.transcriptionJobId);
       } else {
         console.warn("⚠️ Upload successful, but no transcription job id received.");
@@ -294,7 +302,7 @@ class App extends Component {
 
       const transcriptionFilename = `transcription-${timestamp}.json`;
 
-      const s3Response = await axios.get("http://localhost:5000/api/aws/proxy-json", {
+      const s3Response = await axios.get(`${API_BASE_URL}/api/aws/proxy-json`, {
         params: { filename: transcriptionFilename }
       });      
 

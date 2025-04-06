@@ -16,7 +16,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       "/api": {
-        target: "http://localhost:5000", // Change this to match your backend
+        target: "https://call-center-summarization.onrender.com", // Change this to match your backend
         changeOrigin: true,
         secure: false,
       },

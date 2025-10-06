@@ -1,4 +1,4 @@
-# DT Summarizr — MP3/MP4 AI Summarization App
+# Summarizr — MP3/MP4 AI Summarization App
 
 DT Summarizr is a full-stack AI application that allows users to **upload MP3 or MP4 files**, **transcribe them using AWS**, and **generate AI-powered summaries** using OpenAI (through LangChain). Track transcription progress in real-time through AWS CloudWatch and receive organized, bullet-pointed summaries with technical definitions.
 
@@ -271,13 +271,3 @@ If you want to contribute:
 2. Create a new branch
 3. Submit a pull request
 
----
-
-## License
-© 2025 Max Dell-Thibodeau
-
----
-
-## Contact Me
-Want help or want to collaborate?
-Email me at maxd4637@gmail.com
